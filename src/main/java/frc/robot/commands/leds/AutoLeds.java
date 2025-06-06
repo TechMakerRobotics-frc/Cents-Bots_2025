@@ -11,15 +11,11 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.cradle.Cradle;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.led.Led;
-import frc.robot.subsystems.vision.Vision;
 
 public class AutoLeds extends Command {
   private final Led led;
   private final Cradle cradle;
-  // private final Vision vision;
-  private final Arm arm;
-  private final Elevator elevator;
-  private final CommandXboxController driver, operator;
+  private final CommandXboxController operator;
   private Timer timeout = new Timer();
 
   private enum States {
@@ -41,10 +37,6 @@ public class AutoLeds extends Command {
       CommandXboxController operator) {
     this.led = led;
     this.cradle = cradle;
-    // this.vision = vision;
-    this.arm = arm;
-    this.elevator = elevator;
-    this.driver = driver;
     this.operator = operator;
     addRequirements(led);
   }

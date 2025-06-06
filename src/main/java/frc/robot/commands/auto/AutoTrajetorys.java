@@ -7,7 +7,6 @@ import frc.robot.commands.drive.ChoreoAuto;
 import frc.robot.commands.reef.DeliveryCoral;
 import frc.robot.commands.reef.IntakeCoral;
 import frc.robot.subsystems.cradle.Cradle;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.funnel.Funnel;
 import frc.robot.util.LoggedSequentialDashboardChooser;
 import java.util.function.Supplier;
@@ -25,7 +24,7 @@ public class AutoTrajetorys {
   private final Cradle cradle;
   private final Funnel funnel;
 
-  public AutoTrajetorys(Drive drive, Cradle cradle, Funnel funnel) {
+  public AutoTrajetorys(Cradle cradle, Funnel funnel) {
     this.cradle = cradle;
     this.funnel = funnel;
     start();

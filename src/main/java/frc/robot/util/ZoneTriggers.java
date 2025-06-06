@@ -1,12 +1,12 @@
 package frc.robot.util;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveConstants.ZoneLocates.Zones;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates.Zones;
 
 public class ZoneTriggers {
 
-  private final Drive drive;
+  private final SwerveSubsystem drive;
 
   private final Trigger blueLeftStation;
   private final Trigger blueRightStation;
@@ -20,7 +20,7 @@ public class ZoneTriggers {
   private final Trigger redReefSubsystem;
   private final Trigger notZone;
 
-  public ZoneTriggers(Drive drive) {
+  public ZoneTriggers(SwerveSubsystem drive) {
     this.drive = drive;
 
     blueLeftStation = createTrigger(Zones.BLUE_LEFT_STATION);

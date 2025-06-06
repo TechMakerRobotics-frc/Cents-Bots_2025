@@ -6,7 +6,6 @@ package frc.robot.commands.reef;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.cradle.Cradle;
-import frc.robot.subsystems.cradle.CradleConstants;
 import frc.robot.subsystems.funnel.Funnel;
 
 public class IntakeCoral extends Command {
@@ -23,7 +22,7 @@ public class IntakeCoral extends Command {
     adjusted
   }
 
-  private State state = State.intakeing;
+  //private State state = State.intakeing;
 
   public IntakeCoral(Cradle cradle, Funnel funnel) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -37,7 +36,7 @@ public class IntakeCoral extends Command {
   public void initialize() {
     cradle.set(0.75);
     funnel.setConveyor(0.3);
-    state = State.intakeing;
+    //state = State.intakeing;
   }
 
   // Called every time the scheduler runs while the command is scheduled.

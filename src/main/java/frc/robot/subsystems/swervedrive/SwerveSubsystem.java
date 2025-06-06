@@ -22,7 +22,6 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -30,8 +29,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
@@ -44,10 +41,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
-import frc.robot.subsystems.drive.DriveConstants;
-import frc.robot.subsystems.drive.DriveConstants.ZoneLocates;
-import frc.robot.subsystems.drive.DriveConstants.ZoneLocates.Zones;
-import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates;
+import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates.Zones;
+import frc.robot.subsystems.vision.LimelightHelpers;
 import frc.robot.util.Circle2d;
 import frc.robot.util.LocalADStarAK;
 // import frc.robot.subsystems.swervedrivedrive.Vision.Cameras;
@@ -72,12 +68,12 @@ import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
-public class SwerveSubsystem extends SubsystemBase implements Vision.VisionConsumer {
+public class SwerveSubsystem extends SubsystemBase {
 
   /** Swerve drive object. */
   private final SwerveDrive swerveDrive;
   /** Enable vision odometry updates while driving. */
-  private final boolean visionDriveTest = false;
+  private final boolean visionDriveTest = true;
   /** PhotonVision class to keep an accurate odometry. */
   // private       Vision      vision;
 
@@ -185,9 +181,18 @@ public class SwerveSubsystem extends SubsystemBase implements Vision.VisionConsu
   @Override
   public void periodic() {
     // When vision is enabled we must manually update odometry in SwerveDrive
-    if (visionDriveTest) {
-      swerveDrive.updateOdometry();
-      // vision.updatePoseEstimation(swerveDrive);
+    swerveDrive.updateOdometry();
+
+    if (LimelightHelpers.getTV("limelight-left")) {
+      Pose2d visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
+
+      if (visionPose != null) {
+        double timestamp = LimelightHelpers.getLatency_Capture("limelight-left") 
+                        + LimelightHelpers.getLatency_Pipeline("limelight-left");
+        timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
+        
+        swerveDrive.addVisionMeasurement(visionPose, timestamp);
+      }
     }
   }
 
@@ -643,6 +648,16 @@ public class SwerveSubsystem extends SubsystemBase implements Vision.VisionConsu
     return swerveDrive.getPose();
   }
 
+  /**
+   * Gets the current rotation of the robot, as reported by IMU.
+   *
+   * @return The robot's rotation
+   */
+  @AutoLogOutput(key = "Odometry/Robot Rotation")
+  public Rotation2d getRotation() {
+    return swerveDrive.getPose().getRotation();
+  }
+
   /** Returns the current odometry field zone. */
   @AutoLogOutput(key = "Odometry/Current Field Zones")
   public Zones[] getCurrentZones() {
@@ -860,16 +875,6 @@ public class SwerveSubsystem extends SubsystemBase implements Vision.VisionConsu
 
   public void resetDriveEncoders() {
     swerveDrive.resetDriveEncoders();
-  }
-
-  /** Adds a new timestamped vision measurement. */
-  @Override
-  public void accept(
-      Pose2d visionRobotPoseMeters,
-      double timestampSeconds,
-      Matrix<N3, N1> visionMeasurementStdDevs) {
-    swerveDrive.addVisionMeasurement(
-        visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
   /**

@@ -2,15 +2,13 @@ package frc.robot.util;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.commands.leds.*;
-import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.led.Led;
 
 public class RegisNamedCommands {
 
   private Led leds;
 
-  /** Register commands in the pathplanner. */
-  public RegisNamedCommands(Drive drive, Led leds) {
+  public RegisNamedCommands(Led leds) {
     this.leds = leds;
     RegisterLeds();
   }

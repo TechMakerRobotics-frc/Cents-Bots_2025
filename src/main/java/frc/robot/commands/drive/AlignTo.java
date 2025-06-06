@@ -11,12 +11,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.util.GeomUtil;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class AlignTo extends Command {
-  private final Drive drive;
+  private final SwerveSubsystem drive;
   private final Pose2d targetPose;
   private PIDController thetaController;
   private final Timer time = new Timer();
@@ -25,28 +25,28 @@ public class AlignTo extends Command {
   private LoggedNetworkNumber tI = new LoggedNetworkNumber("/Tuning/I", 0);
   private LoggedNetworkNumber tD = new LoggedNetworkNumber("/Tuning/D", 0);
 
-  public AlignTo(Drive drive, double x, double y, double timeOut) {
+  public AlignTo(SwerveSubsystem drive, double x, double y, double timeOut) {
     this.drive = drive;
     this.targetPose = new Pose2d(x, y, new Rotation2d());
     this.timeOut = timeOut;
     addRequirements(drive);
   }
 
-  public AlignTo(Drive drive, Pose2d pose, double timeOut) {
+  public AlignTo(SwerveSubsystem drive, Pose2d pose, double timeOut) {
     this.drive = drive;
     this.targetPose = pose;
     this.timeOut = timeOut;
     addRequirements(drive);
   }
 
-  public AlignTo(Drive drive, Translation2d translation, double timeOut) {
+  public AlignTo(SwerveSubsystem drive, Translation2d translation, double timeOut) {
     this.drive = drive;
     this.targetPose = new Pose2d(translation, new Rotation2d());
     this.timeOut = timeOut;
     addRequirements(drive);
   }
 
-  public AlignTo(Drive drive, int tag, double timeOut) {
+  public AlignTo(SwerveSubsystem drive, int tag, double timeOut) {
     this.drive = drive;
     AprilTagFieldLayout fTagFieldLayout =
         AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
@@ -85,12 +85,12 @@ public class AlignTo extends Command {
             speeds,
             isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI)) : drive.getRotation());
 
-    drive.runVelocity(speeds);
+    drive.drive(speeds);
   }
 
   @Override
   public void end(boolean interrupted) {
-    drive.stop();
+    drive.lock();
   }
 
   @Override

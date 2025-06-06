@@ -2,14 +2,14 @@ package frc.robot.util;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.IdleMode;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 
 public class RobotModeTo extends InstantCommand {
 
-  private final Drive drive;
+  private final SwerveSubsystem drive;
   private IdleMode mode;
 
-  public RobotModeTo(IdleMode idleMode, Drive drive) {
+  public RobotModeTo(IdleMode idleMode, SwerveSubsystem drive) {
     this.mode = idleMode;
     this.drive = drive;
   }
@@ -18,10 +18,10 @@ public class RobotModeTo extends InstantCommand {
   public void initialize() {
     switch (mode) {
       case COAST:
-        drive.setBrakeMode(false);
+        drive.setMotorBrake(false);
         break;
       default:
-        drive.setBrakeMode(true);
+        drive.setMotorBrake(true);
         break;
     }
   }
