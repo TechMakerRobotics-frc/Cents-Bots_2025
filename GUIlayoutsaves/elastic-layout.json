@@ -1,0 +1,151 @@
+{
+  "version": 1.0,
+  "grid_size": 12,
+  "tabs": [
+    {
+      "name": "Autonomous",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Colect_0",
+            "x": 672.0,
+            "y": 0.0,
+            "width": 684.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Colect_0",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Colect_1",
+            "x": 672.0,
+            "y": 120.0,
+            "width": 684.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Colect_1",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Colect_2",
+            "x": 672.0,
+            "y": 240.0,
+            "width": 684.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Colect_2",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Colect_4",
+            "x": 672.0,
+            "y": 480.0,
+            "width": 684.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Colect_4",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Delivery_0",
+            "x": 0.0,
+            "y": 120.0,
+            "width": 672.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Delivery_0",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Delivery_1",
+            "x": 0.0,
+            "y": 240.0,
+            "width": 672.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Delivery_1",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Delivery_2",
+            "x": 0.0,
+            "y": 360.0,
+            "width": 672.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Delivery_2",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Delivery_3",
+            "x": 0.0,
+            "y": 480.0,
+            "width": 672.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Delivery_3",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Start",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 672.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Start",
+              "period": 0.06,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Colect_3",
+            "x": 672.0,
+            "y": 360.0,
+            "width": 684.0,
+            "height": 120.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Colect_3",
+              "period": 0.06,
+              "sort_options": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Teleoperated",
+      "grid_layout": {
+        "layouts": [],
+        "containers": []
+      }
+    }
+  ]
+}
