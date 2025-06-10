@@ -22,7 +22,7 @@ public class IntakeCoral extends Command {
     adjusted
   }
 
-  //private State state = State.intakeing;
+  // private State state = State.intakeing;
 
   public IntakeCoral(Cradle cradle, Funnel funnel) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -36,14 +36,12 @@ public class IntakeCoral extends Command {
   public void initialize() {
     cradle.set(0.75);
     funnel.setConveyor(0.3);
-    //state = State.intakeing;
+    // state = State.intakeing;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override

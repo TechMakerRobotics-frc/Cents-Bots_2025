@@ -14,7 +14,6 @@ import frc.robot.commands.CommandConstants.MoveXConstants;
 import frc.robot.commands.CommandConstants.MoveYConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.util.ChassisSpeedsLimiter;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
@@ -27,17 +26,26 @@ public class MoveXYHeading extends Command {
   private double deltaY;
   private Double targetHeadingDegrees;
 
-  private final LoggedNetworkNumber kXP = new LoggedNetworkNumber("/Tuning/X/KP", MoveXConstants.k_P);
-  private final LoggedNetworkNumber kXI = new LoggedNetworkNumber("/Tuning/X/KI", MoveXConstants.k_I);
-  private final LoggedNetworkNumber kXD = new LoggedNetworkNumber("/Tuning/X/KD", MoveXConstants.k_D);
+  private final LoggedNetworkNumber kXP =
+      new LoggedNetworkNumber("/Tuning/X/KP", MoveXConstants.k_P);
+  private final LoggedNetworkNumber kXI =
+      new LoggedNetworkNumber("/Tuning/X/KI", MoveXConstants.k_I);
+  private final LoggedNetworkNumber kXD =
+      new LoggedNetworkNumber("/Tuning/X/KD", MoveXConstants.k_D);
 
-  private final LoggedNetworkNumber kYP = new LoggedNetworkNumber("/Tuning/Y/KP", MoveYConstants.k_P);
-  private final LoggedNetworkNumber kYI = new LoggedNetworkNumber("/Tuning/Y/KI", MoveYConstants.k_I);
-  private final LoggedNetworkNumber kYD = new LoggedNetworkNumber("/Tuning/Y/KD", MoveYConstants.k_D);
+  private final LoggedNetworkNumber kYP =
+      new LoggedNetworkNumber("/Tuning/Y/KP", MoveYConstants.k_P);
+  private final LoggedNetworkNumber kYI =
+      new LoggedNetworkNumber("/Tuning/Y/KI", MoveYConstants.k_I);
+  private final LoggedNetworkNumber kYD =
+      new LoggedNetworkNumber("/Tuning/Y/KD", MoveYConstants.k_D);
 
-  private final LoggedNetworkNumber kHP = new LoggedNetworkNumber("/Tuning/H/KP", MoveHConstants.k_P);
-  private final LoggedNetworkNumber kHI = new LoggedNetworkNumber("/Tuning/H/KI", MoveHConstants.k_I);
-  private final LoggedNetworkNumber kHD = new LoggedNetworkNumber("/Tuning/H/KD", MoveHConstants.k_D);
+  private final LoggedNetworkNumber kHP =
+      new LoggedNetworkNumber("/Tuning/H/KP", MoveHConstants.k_P);
+  private final LoggedNetworkNumber kHI =
+      new LoggedNetworkNumber("/Tuning/H/KI", MoveHConstants.k_I);
+  private final LoggedNetworkNumber kHD =
+      new LoggedNetworkNumber("/Tuning/H/KD", MoveHConstants.k_D);
 
   private final PIDController xController;
   private final PIDController yController;
@@ -111,7 +119,7 @@ public class MoveXYHeading extends Command {
             targetPose,
             0.0, // velocidade linear, pode ser calculada automaticamente
             targetPose.getRotation());
-          
+
     ChassisSpeeds rampSpeed = ramp.calculate(targetSpeeds);
     swerve.drive(rampSpeed);
 
@@ -135,10 +143,13 @@ public class MoveXYHeading extends Command {
     Logger.recordOutput(
         "/MoveXYHeading/H/CurrentPoseValue", currentPose.getRotation().getDegrees());
 
-    Logger.recordOutput("/MoveXYHeading/X/RelativePoseValue", currentPose.getX() - inicialPose.getX());
-    Logger.recordOutput("/MoveXYHeading/Y/RelativePoseValue", currentPose.getY() - inicialPose.getY());
-    Logger.recordOutput("/MoveXYHeading/H/RelativePoseValue", currentPose.getRotation().getDegrees() - inicialPose.getRotation().getDegrees());
-      
+    Logger.recordOutput(
+        "/MoveXYHeading/X/RelativePoseValue", currentPose.getX() - inicialPose.getX());
+    Logger.recordOutput(
+        "/MoveXYHeading/Y/RelativePoseValue", currentPose.getY() - inicialPose.getY());
+    Logger.recordOutput(
+        "/MoveXYHeading/H/RelativePoseValue",
+        currentPose.getRotation().getDegrees() - inicialPose.getRotation().getDegrees());
 
     Logger.recordOutput("/MoveXYHeading/X/Error", targetPose.getX() - currentPose.getX());
     Logger.recordOutput("/MoveXYHeading/Y/Error", targetPose.getY() - currentPose.getY());

@@ -37,7 +37,7 @@ public class L0 extends Command {
 
   @Override
   public void execute() {
-   
+
     if (elevator.atZero() && !armSettedZero) {
       arm.runPosition(ArmConstants.ARM_MIN_POSITION);
       cradle.setZero();
