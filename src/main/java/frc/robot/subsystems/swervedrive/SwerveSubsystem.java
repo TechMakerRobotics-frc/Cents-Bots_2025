@@ -44,6 +44,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates;
 import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates.Zones;
 import frc.robot.subsystems.vision.LimelightHelpers;
+import frc.robot.util.AntiTipping;
 import frc.robot.util.Circle2d;
 import frc.robot.util.LocalADStarAK;
 // import frc.robot.subsystems.swervedrivedrive.Vision.Cameras;
@@ -89,6 +90,8 @@ public class SwerveSubsystem extends SubsystemBase {
   private static final double TIPPING_THRESHOLD = 3;
   private static final double ROBOT_MOI = 4.4679;
   private static final double WHEEL_COF = 1.2;
+
+  private AntiTipping antiTipping = new AntiTipping(() -> getPitch().getDegrees(), () -> getRoll().getDegrees());
 
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
@@ -162,6 +165,11 @@ public class SwerveSubsystem extends SubsystemBase {
             controllerCfg,
             Constants.MAX_SPEED,
             new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)), Rotation2d.fromDegrees(0)));
+    
+    antiTipping.setMaxCorrectionSpeed(Constants.MAX_SPEED);
+    antiTipping.setTolerance(1);
+    antiTipping.setTippingThreshold(TIPPING_THRESHOLD);
+    antiTipping.setPIDConstants(0.1, 0, 0);
   }
 
   /** Setup the photon vision class. */
@@ -547,40 +555,15 @@ public class SwerveSubsystem extends SubsystemBase {
    * @param velocity Velocity according to the field.
    */
   public Command driveFieldOrientedWithBalance(Supplier<ChassisSpeeds> velocity) {
-    return run(
-        () -> {
-          double pitch = getPitch().getDegrees();
-          double roll = getRoll().getDegrees();
+    return run(() -> {
+      ChassisSpeeds currentVelocity = velocity.get();
+  
+      currentVelocity = antiTipping.calculate(currentVelocity, getRotation());
 
-          ChassisSpeeds currentVelocity = velocity.get();
-
-          boolean isTipping = false;
-
-          if (Math.abs(pitch) > TIPPING_THRESHOLD || Math.abs(roll) > TIPPING_THRESHOLD) {
-            isTipping = true;
-            double tiltAngleRadians = Math.atan2(-roll, -pitch);
-            Rotation2d tiltDirection = new Rotation2d(tiltAngleRadians);
-
-            Translation2d correctionVector = new Translation2d(0, 1).rotateBy(tiltDirection);
-
-            Translation2d linearVelocity =
-                new Translation2d(
-                    correctionVector.getX() * Constants.MAX_SPEED,
-                    correctionVector.getY() * Constants.MAX_SPEED);
-
-            double omega = currentVelocity.omegaRadiansPerSecond;
-
-            currentVelocity =
-                new ChassisSpeeds(-linearVelocity.getX(), linearVelocity.getY(), omega);
-          }
-
-          if (isTipping) {
-            swerveDrive.drive(currentVelocity);
-          } else {
-            swerveDrive.driveFieldOriented(velocity.get());
-          }
-        });
+      swerveDrive.driveFieldOriented(currentVelocity);
+    });
   }
+  
 
   /**
    * Drive according to the chassis robot oriented velocity with anti-tipping control.
