@@ -18,18 +18,15 @@ import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoA1 extends SequentialCommandGroup {
   /** Creates a new AutoA1. */
-  public AutoA1(SwerveSubsystem swerve,
-  Arm arm,
-  Elevator elevator,
-  Cradle cradle) {
+  public AutoA1(SwerveSubsystem swerve, Arm arm, Elevator elevator, Cradle cradle) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(new L1(arm, elevator, cradle),
-                new DriveToX(swerve, 2).withTimeout(3),
-                new DeliveryCoralSlow(cradle).withTimeout(3),
-                new DriveToHeading(swerve, 90).withTimeout(2),
-                new L0(arm, elevator, cradle),
-                new DriveToHeading(swerve, 90).withTimeout(2)
-                );
+    addCommands(
+        new L1(arm, elevator, cradle),
+        new DriveToX(swerve, 2).withTimeout(3),
+        new DeliveryCoralSlow(cradle).withTimeout(3),
+        new DriveToHeading(swerve, 90).withTimeout(2),
+        new L0(arm, elevator, cradle),
+        new DriveToHeading(swerve, 90).withTimeout(2));
   }
 }

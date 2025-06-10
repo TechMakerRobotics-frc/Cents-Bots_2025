@@ -187,10 +187,11 @@ public class SwerveSubsystem extends SubsystemBase {
       Pose2d visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
 
       if (visionPose != null) {
-        double timestamp = LimelightHelpers.getLatency_Capture("limelight-left") 
-                        + LimelightHelpers.getLatency_Pipeline("limelight-left");
+        double timestamp =
+            LimelightHelpers.getLatency_Capture("limelight-left")
+                + LimelightHelpers.getLatency_Pipeline("limelight-left");
         timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
-        
+
         swerveDrive.addVisionMeasurement(visionPose, timestamp);
       }
     }
@@ -297,8 +298,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private Command driveWithSetpointGenerator(Supplier<ChassisSpeeds> robotRelativeChassisSpeed)
       throws IOException, ParseException {
     SwerveSetpointGenerator setpointGenerator =
-        new SwerveSetpointGenerator(
-            PP_CONFIG, swerveDrive.getMaximumChassisAngularVelocity());
+        new SwerveSetpointGenerator(PP_CONFIG, swerveDrive.getMaximumChassisAngularVelocity());
     AtomicReference<SwerveSetpoint> prevSetpoint =
         new AtomicReference<>(
             new SwerveSetpoint(

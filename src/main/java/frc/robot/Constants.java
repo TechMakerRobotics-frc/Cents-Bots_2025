@@ -63,7 +63,7 @@ public final class Constants {
   public static final double MAX_ANGULAR_SPEED = Units.degreesToRadians(600);
 
   public static final double MAX_ACCELERATION = Units.feetToMeters(2);
-  
+
   public static final double MAX_SPEED_LIMITED = Units.feetToMeters(2.5);
   // Maximum speed of the robot in meters per second, used to limit acceleration.
 

@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -48,9 +49,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
-
-import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import swervelib.SwerveInputStream;
 
 /**
@@ -126,7 +124,7 @@ public class RobotContainer {
 
   private static final Integer kL1 = 1;
   private static final Integer kAutoLeave = 0;
-  //private Integer m_autoSelected;
+  // private Integer m_autoSelected;
   private final SendableChooser<Integer> m_chooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -235,15 +233,15 @@ public class RobotContainer {
     operatorController.povRight().onTrue(new IntakeCoral(cradle, funnel));
     operatorController
         .povUp()
-        .onTrue(new InstantCommand(() -> cradle.setInverted(CradleConstants.INTAKE_ADJUST),
-    cradle))
+        .onTrue(new InstantCommand(() -> cradle.setInverted(CradleConstants.INTAKE_ADJUST), cradle))
         .onFalse(new InstantCommand(() -> cradle.set(0), cradle));
 
     operatorController.leftBumper().whileTrue(new Zeroelevator(elevator));
     operatorController.rightBumper().whileTrue(new zeroArm(arm));
-    operatorController.leftTrigger(0.5).onTrue(new
-    InstantCommand(()->cradle.set(CradleConstants.INTAKE_BACK),cradle))
-                                        .onFalse(new InstantCommand(()->cradle.set(0),cradle));
+    operatorController
+        .leftTrigger(0.5)
+        .onTrue(new InstantCommand(() -> cradle.set(CradleConstants.INTAKE_BACK), cradle))
+        .onFalse(new InstantCommand(() -> cradle.set(0), cradle));
     climb.onTrue(new Climb(climber)).onFalse(new StopClimber(climber));
 
     reverseClimb.onTrue(new ReverseClimb(climber)).onFalse(new StopClimber(climber));

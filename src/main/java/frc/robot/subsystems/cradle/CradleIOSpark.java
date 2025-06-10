@@ -76,7 +76,7 @@ public class CradleIOSpark implements CradleIO {
         CradleConstants.WRIST_kP, CradleConstants.WRIST_kI, CradleConstants.WRIST_kD);
     Timer.delay(2);
     motorWrist.setOffset(0);
-    //setZero();
+    // setZero();
 
     frontSensor = new DigitalInput(CradleConstants.FRONT_SENSOR_PORT);
     backSensor = new DigitalInput(CradleConstants.BACK_SENSOR_PORT);
