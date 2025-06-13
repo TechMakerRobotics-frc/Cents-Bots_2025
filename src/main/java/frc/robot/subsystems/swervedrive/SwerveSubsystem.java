@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
@@ -102,6 +103,8 @@ public class SwerveSubsystem extends SubsystemBase {
               DriveConstants.kSlipCurrent.in(Amps),
               1),
           getModuleTranslations());
+
+  private boolean useMegatag2 = false;
 
   public SwerveSubsystem(File directory) {
     boolean blueAlliance = false;
@@ -182,27 +185,23 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     // When vision is enabled we must manually update odometry in SwerveDrive
     swerveDrive.updateOdometry();
-    LimelightHelpers.SetRobotOrientation(
-      "limelight-left",
-      getRotation().getDegrees(),
-      0,
-      getPitch().getDegrees(), 
-      0,
-      getRoll().getDegrees(),
-      0
-    );
+
+    Pose2d visionPose;
+    double timestamp;
+    
+    timestamp = LimelightHelpers.getLatency_Capture("limelight-left") 
+    + LimelightHelpers.getLatency_Pipeline("limelight-left");
+    timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
 
     if (LimelightHelpers.getTV("limelight-left")) {
-      Pose2d visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
-
-      if (visionPose != null) {
-        double timestamp =
-            LimelightHelpers.getLatency_Capture("limelight-left")
-                + LimelightHelpers.getLatency_Pipeline("limelight-left");
-        timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
-
-        swerveDrive.addVisionMeasurement(visionPose, timestamp);
+      if (!useMegatag2) {
+        visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
+      } else {
+        LimelightHelpers.SetIMUMode("limelight-left", 1);
+        LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
       }
+      swerveDrive.addVisionMeasurement(visionPose, timestamp);
     }
   }
 
@@ -880,6 +879,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public void addVisionMeasurement(Pose2d pose, double timestamps) {
     swerveDrive.addVisionMeasurement(pose, timestamps);
+  }
+
+  public InstantCommand useMegatag2(boolean use) {
+    return new InstantCommand(() -> this.useMegatag2 = use);
+  }
+
+  public void setMegatag2(boolean use) {
+    useMegatag2 = use;
   }
 
   public void resetDriveEncoders() {
