@@ -21,6 +21,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.Constants;
 import frc.robot.util.Circle2d;
 import java.util.List;
 
@@ -228,8 +229,6 @@ public class DriveConstants {
     }
   }
 
-  public static final double MAX_SPEED_MTS_SEC = 30.5;
-
   // Gear ratios for SDS MK4i L3, adjust as necessary
   public static final double DRIVE_GEAR_RATIO = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
   public static final double TURN_GEAR_RATIO = 150.0 / 7.0;
@@ -260,7 +259,7 @@ public class DriveConstants {
               .withSteerMotorClosedLoopOutput(kSteerClosedLoopOutput)
               .withDriveMotorClosedLoopOutput(kDriveClosedLoopOutput)
               .withSlipCurrent(kSlipCurrent)
-              .withSpeedAt12Volts(MAX_SPEED_MTS_SEC)
+              .withSpeedAt12Volts(Constants.MAX_SPEED)
               .withFeedbackSource(kSteerFeedbackType)
               .withDriveMotorInitialConfigs(driveInitialConfigs)
               .withSteerMotorInitialConfigs(steerInitialConfigs)

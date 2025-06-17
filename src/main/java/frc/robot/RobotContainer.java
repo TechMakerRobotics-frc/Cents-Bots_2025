@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 // import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RobotState;
+import frc.robot.commands.drive.GoToFieldPose;
 // import frc.robot.commands.climber.Climb;
 // import frc.robot.commands.climber.MinimalClimb;
 // import frc.robot.commands.climber.ReverseClimb;
@@ -44,6 +45,9 @@ import frc.robot.Constants.RobotState;
 // import frc.robot.subsystems.led.LedIOReal;
 // import frc.robot.subsystems.led.LedIOSim;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.util.GeomUtil;
+import frc.robot.util.flippable.FlippablePose2d;
+
 import java.io.File;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -204,10 +208,10 @@ public class RobotContainer {
     driveController
         .start()
         .onTrue(
-            new InstantCommand(() -> drivebase.resetOdometry(new Pose2d(0, 0, new Rotation2d()))));
+            new InstantCommand(() -> drivebase.resetOdometry(new Pose2d(drivebase.getPose().getTranslation(), new Rotation2d()))));
 
-    driveController.povUp().onTrue(new PathPlannerAuto("1Metro"));
-    driveController.povLeft().onTrue(new PathPlannerAuto("90Graus"));
+
+    driveController.y().onTrue(new PathPlannerAuto("Autotestal"));
 
     // // leds
     // operatorController

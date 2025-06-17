@@ -97,7 +97,7 @@ public class SwerveSubsystem extends SubsystemBase {
           ROBOT_MOI,
           new ModuleConfig(
               DriveConstants.kWheelRadius.in(Meters),
-              DriveConstants.MAX_SPEED_MTS_SEC,
+              Constants.MAX_SPEED,
               WHEEL_COF,
               DCMotor.getKrakenX60(1).withReduction(DriveConstants.DRIVE_GEAR_RATIO),
               DriveConstants.kSlipCurrent.in(Amps),
@@ -193,11 +193,15 @@ public class SwerveSubsystem extends SubsystemBase {
     + LimelightHelpers.getLatency_Pipeline("limelight-left");
     timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
 
-    if (LimelightHelpers.getTV("limelight-left")) {
+    if (
+      LimelightHelpers.getTV("limelight-left") && 
+      swerveDrive.getRobotVelocity().vxMetersPerSecond < 2 &&
+      swerveDrive.getRobotVelocity().vyMetersPerSecond < 2 &&
+      swerveDrive.getRobotVelocity().omegaRadiansPerSecond < (Math.PI/4) 
+    ) {
       if (!useMegatag2) {
         visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
       } else {
-        LimelightHelpers.SetIMUMode("limelight-left", 1);
         LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
         visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
       }
@@ -282,10 +286,10 @@ public class SwerveSubsystem extends SubsystemBase {
     // Create the constraints to use while pathfinding
     PathConstraints constraints =
         new PathConstraints(
-            Constants.MAX_SPEED,
+            1.5,
             1.2,
             swerveDrive.getMaximumChassisAngularVelocity(),
-            Units.degreesToRadians(720));
+            Units.degreesToRadians(400));
 
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     return AutoBuilder.pathfindToPose(
