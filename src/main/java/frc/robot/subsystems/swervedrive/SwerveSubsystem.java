@@ -182,9 +182,18 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     // When vision is enabled we must manually update odometry in SwerveDrive
     swerveDrive.updateOdometry();
+    LimelightHelpers.SetRobotOrientation(
+      "limelight-left",
+      getRotation().getDegrees(),
+      0,
+      getPitch().getDegrees(), 
+      0,
+      getRoll().getDegrees(),
+      0
+    );
 
     if (LimelightHelpers.getTV("limelight-left")) {
-      Pose2d visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
+      Pose2d visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
 
       if (visionPose != null) {
         double timestamp =
