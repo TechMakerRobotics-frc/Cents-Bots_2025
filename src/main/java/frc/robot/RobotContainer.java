@@ -3,9 +3,14 @@ package frc.robot;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -100,9 +105,9 @@ public class RobotContainer {
   SwerveInputStream driveAngularVelocity =
       SwerveInputStream.of(
               drivebase.getSwerveDrive(),
-              () -> driveController.getLeftY() * -1,
-              () -> driveController.getLeftX() * -1)
-          .withControllerRotationAxis(() -> driveController.getRightX() * -1)
+              () -> -driveController.getLeftY(),
+              () -> -driveController.getLeftX())
+          .withControllerRotationAxis(() -> -driveController.getRightX())
           .deadband(OperatorConstants.DEADBAND)
           .scaleTranslation(0.8)
           .allianceRelativeControl(true);
@@ -204,7 +209,12 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
+  double angleAlliance = 0;
+
   private void configureButtonBindings() {
+    // if(DriverStation.getAlliance().get()==Alliance.Red){
+    //   angleAlliance = 180;
+    // }
     driveController
         .start()
         .onTrue(

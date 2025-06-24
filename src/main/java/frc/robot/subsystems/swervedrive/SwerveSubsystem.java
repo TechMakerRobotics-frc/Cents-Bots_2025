@@ -104,7 +104,7 @@ public class SwerveSubsystem extends SubsystemBase {
               1),
           getModuleTranslations());
 
-  private boolean useMegatag2 = false;
+  private boolean useMegatag2 = true;
 
   public SwerveSubsystem(File directory) {
     boolean blueAlliance = false;
@@ -188,7 +188,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d visionPose;
     double timestamp;
-    
+    LimelightHelpers.SetIMUMode("limelight-left", 0);
     timestamp = LimelightHelpers.getLatency_Capture("limelight-left") 
     + LimelightHelpers.getLatency_Pipeline("limelight-left");
     timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
@@ -199,13 +199,23 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.getRobotVelocity().vyMetersPerSecond < 2 &&
       swerveDrive.getRobotVelocity().omegaRadiansPerSecond < (Math.PI/4) 
     ) {
-      if (!useMegatag2) {
-        visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
-      } else {
-        LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
+
+      //if (!(getPose().getTranslation().getDistance(LimelightHelpers.getBotPose2d_wpiBlue("limelight-left").getTranslation()) > 0.2)) {
+        if (!useMegatag2) {
+          visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
+        } else {
+          if(DriverStation.getAlliance().get()==Alliance.Red){
+            LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees()-180, 0, 0, 0, 0, 0);
+            visionPose = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left").pose;
+          }
+          else{
+            LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
+            visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
+          }
       }
-      swerveDrive.addVisionMeasurement(visionPose, timestamp);
+
+        swerveDrive.addVisionMeasurement(visionPose, timestamp);
+      //}
     }
   }
 
