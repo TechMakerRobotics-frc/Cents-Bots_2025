@@ -1,43 +1,24 @@
 package frc.robot;
 
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.AngleUnit;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-// import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RobotState;
-import frc.robot.commands.drive.GoToFieldPose;
-import frc.robot.commands.climber.Climb;
-import frc.robot.commands.climber.MinimalClimb;
-import frc.robot.commands.climber.ReverseClimb;
-import frc.robot.commands.climber.StopClimber;
 import frc.robot.commands.leds.*;
 import frc.robot.commands.reef.*;
-import frc.robot.commands.zero.Zeroelevator;
-import frc.robot.commands.zero.zeroArm;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOSpark;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOSpark;
 import frc.robot.subsystems.cradle.Cradle;
-import frc.robot.subsystems.cradle.CradleConstants;
 import frc.robot.subsystems.cradle.CradleIO;
 import frc.robot.subsystems.cradle.CradleIOSpark;
 import frc.robot.subsystems.elevator.Elevator;
@@ -74,7 +55,6 @@ public class RobotContainer {
   private final Arm arm;
   private final Cradle cradle;
   private final Funnel funnel;
-  private final Climber climber;
 
   private SwerveDriveSimulation driveSimulation = null;
 
@@ -89,16 +69,7 @@ public class RobotContainer {
   private final CommandXboxController driveController = new CommandXboxController(0);
   private final CommandXboxController operatorController = new CommandXboxController(1);
 
-  // private final Joystick tablet = new Joystick(1);
-  // private final JoystickButton level1 = new JoystickButton(tablet, 13);
-  // private final JoystickButton level2 = new JoystickButton(tablet, 14);
-  // private final JoystickButton level3 = new JoystickButton(tablet, 15);
-  // private final JoystickButton level4 = new JoystickButton(tablet, 16);
-  // private final JoystickButton coralStationLeft = new JoystickButton(tablet, 17);
-  // private final JoystickButton coralStationRight = new JoystickButton(tablet, 18);
-
   // The robot's subsystems and commands are defined here...
-
   private final SwerveSubsystem drivebase =
       new SwerveSubsystem(new File(Filesystem.getDeployDirectory(), "swerve"));
   Command driveFieldOrientedAngularVelocity;
@@ -156,7 +127,6 @@ public class RobotContainer {
         arm = new Arm(new ArmIOSpark());
         cradle = new Cradle(new CradleIOSpark());
         funnel = new Funnel(new FunnelIOSpark());
-        climber = new Climber(new ClimberIOSpark());
         break;
 
       case SIM:
@@ -167,7 +137,6 @@ public class RobotContainer {
         arm = new Arm(new ArmIO() {});
         cradle = new Cradle(new CradleIO() {});
         funnel = new Funnel(new FunnelIO() {});
-        climber = new Climber(new ClimberIO() {});
         break;
 
       default:
@@ -178,7 +147,6 @@ public class RobotContainer {
         arm = new Arm(new ArmIO() {});
         cradle = new Cradle(new CradleIO() {});
         funnel = new Funnel(new FunnelIO() {});
-        climber = new Climber(new ClimberIO() {});
         break;
     }
 
@@ -197,8 +165,9 @@ public class RobotContainer {
     // climb = new Trigger(() -> (driveController.getRightTriggerAxis() >= 0.4));
     // reverseClimb = new Trigger(() -> (driveController.getLeftTriggerAxis() >= 0.4));
 
-    // leds.setDefaultCommand(
-    //     new AutoLeds(leds, cradle, arm, elevator, driveController, operatorController));
+    leds.setDefaultCommand(
+        new AutoLeds(leds, cradle, arm, elevator, driveController, operatorController));
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -212,9 +181,6 @@ public class RobotContainer {
   double angleAlliance = 0;
 
   private void configureButtonBindings() {
-    // if(DriverStation.getAlliance().get()==Alliance.Red){
-    //   angleAlliance = 180;
-    // }
     driveController
         .start()
         .onTrue(
@@ -224,25 +190,25 @@ public class RobotContainer {
     driveController.leftBumper().whileTrue(drivebase.driveToPose(FieldConstants.ReefPoses.A_BLUE));
     driveController.rightBumper().whileTrue(drivebase.driveToPose(FieldConstants.ReefPoses.B_BLUE));
 
-    // // leds
-    // operatorController
-    //     .rightStick()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //             () -> {
-    //               currentLedState = (currentLedState + 1) % ledCommands.length;
-    //               Command nextCommand = ledCommands[currentLedState];
-    //               nextCommand.schedule();
-    //             }));
-    // operatorController.a().onTrue(new L1(arm, elevator, cradle));
+    // leds
+    operatorController
+        .rightStick()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  currentLedState = (currentLedState + 1) % ledCommands.length;
+                  Command nextCommand = ledCommands[currentLedState];
+                  nextCommand.schedule();
+                }));
+    operatorController.a().onTrue(new L1(arm, elevator, cradle));
 
-    // operatorController.b().onTrue(new L2(arm, elevator, cradle));
+    operatorController.b().onTrue(new L2(arm, elevator, cradle));
 
-    driveController.x().onTrue(new L3(arm, elevator, cradle));
+    operatorController.x().onTrue(new L3(arm, elevator, cradle));
 
-    // operatorController.y().onTrue(new L4(arm, elevator, cradle));
+    operatorController.y().onTrue(new L4(arm, elevator, cradle));
 
-    // operatorController.povDown().onTrue(new L0(arm, elevator, cradle));
+    operatorController.povDown().onTrue(new L0(arm, elevator, cradle));
 
     driveController.povLeft().onTrue(new DeliveryCoral(cradle));
     driveController.povRight().onTrue(new IntakeCoral(cradle, funnel));
