@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -21,37 +22,36 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RobotState;
 import frc.robot.commands.drive.GoToFieldPose;
-// import frc.robot.commands.climber.Climb;
-// import frc.robot.commands.climber.MinimalClimb;
-// import frc.robot.commands.climber.ReverseClimb;
-// import frc.robot.commands.climber.StopClimber;
-// import frc.robot.commands.leds.*;
-// import frc.robot.commands.reef.*;
-// import frc.robot.commands.zero.Zeroelevator;
-// import frc.robot.commands.zero.zeroArm;
-// import frc.robot.subsystems.arm.Arm;
-// import frc.robot.subsystems.arm.ArmIO;
-// import frc.robot.subsystems.arm.ArmIOSpark;
-// import frc.robot.subsystems.climber.Climber;
-// import frc.robot.subsystems.climber.ClimberIO;
-// import frc.robot.subsystems.climber.ClimberIOSpark;
-// import frc.robot.subsystems.cradle.Cradle;
-// import frc.robot.subsystems.cradle.CradleConstants;
-// import frc.robot.subsystems.cradle.CradleIO;
-// import frc.robot.subsystems.cradle.CradleIOSpark;
-// import frc.robot.subsystems.elevator.Elevator;
-// import frc.robot.subsystems.elevator.ElevatorIO;
-// import frc.robot.subsystems.elevator.ElevatorIOSpark;
-// import frc.robot.subsystems.funnel.Funnel;
-// import frc.robot.subsystems.funnel.FunnelIO;
-// import frc.robot.subsystems.funnel.FunnelIOSpark;
-// import frc.robot.subsystems.led.Led;
-// import frc.robot.subsystems.led.LedIO;
-// import frc.robot.subsystems.led.LedIOReal;
-// import frc.robot.subsystems.led.LedIOSim;
+import frc.robot.commands.climber.Climb;
+import frc.robot.commands.climber.MinimalClimb;
+import frc.robot.commands.climber.ReverseClimb;
+import frc.robot.commands.climber.StopClimber;
+import frc.robot.commands.leds.*;
+import frc.robot.commands.reef.*;
+import frc.robot.commands.zero.Zeroelevator;
+import frc.robot.commands.zero.zeroArm;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOSpark;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSpark;
+import frc.robot.subsystems.cradle.Cradle;
+import frc.robot.subsystems.cradle.CradleConstants;
+import frc.robot.subsystems.cradle.CradleIO;
+import frc.robot.subsystems.cradle.CradleIOSpark;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOSpark;
+import frc.robot.subsystems.funnel.Funnel;
+import frc.robot.subsystems.funnel.FunnelIO;
+import frc.robot.subsystems.funnel.FunnelIOSpark;
+import frc.robot.subsystems.led.Led;
+import frc.robot.subsystems.led.LedIO;
+import frc.robot.subsystems.led.LedIOReal;
+import frc.robot.subsystems.led.LedIOSim;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import frc.robot.util.GeomUtil;
-import frc.robot.util.flippable.FlippablePose2d;
+import frc.robot.util.FieldConstants;
 
 import java.io.File;
 import org.ironmaple.simulation.SimulatedArena;
@@ -69,25 +69,25 @@ import swervelib.SwerveInputStream;
 public class RobotContainer {
 
   // Subsystems
-  // private final Led leds;
-  // private final Elevator elevator;
-  // private final Arm arm;
-  // private final Cradle cradle;
-  // private final Funnel funnel;
-  // private final Climber climber;
+  private final Led leds;
+  private final Elevator elevator;
+  private final Arm arm;
+  private final Cradle cradle;
+  private final Funnel funnel;
+  private final Climber climber;
 
   private SwerveDriveSimulation driveSimulation = null;
 
   // control leds
-  // private int currentLedState = 0;
-  // private final Command[] ledCommands;
+  private int currentLedState = 0;
+  private final Command[] ledCommands;
 
   // State Machine
   private RobotState currentState = RobotState.NOT_ZONE;
 
   // Controller
   private final CommandXboxController driveController = new CommandXboxController(0);
-  // private final CommandXboxController operatorController = new CommandXboxController(1);
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   // private final Joystick tablet = new Joystick(1);
   // private final JoystickButton level1 = new JoystickButton(tablet, 13);
@@ -151,48 +151,48 @@ public class RobotContainer {
       case REAL:
         // Real robot, instantiate hardware IO implementations
 
-        // leds = new Led(new LedIOReal());
-        // elevator = new Elevator(new ElevatorIOSpark());
-        // arm = new Arm(new ArmIOSpark());
-        // cradle = new Cradle(new CradleIOSpark());
-        // funnel = new Funnel(new FunnelIOSpark());
-        // climber = new Climber(new ClimberIOSpark());
+        leds = new Led(new LedIOReal());
+        elevator = new Elevator(new ElevatorIOSpark());
+        arm = new Arm(new ArmIOSpark());
+        cradle = new Cradle(new CradleIOSpark());
+        funnel = new Funnel(new FunnelIOSpark());
+        climber = new Climber(new ClimberIOSpark());
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
 
-        // leds = new Led(new LedIOSim());
-        // elevator = new Elevator(new ElevatorIO() {});
-        // arm = new Arm(new ArmIO() {});
-        // cradle = new Cradle(new CradleIO() {});
-        // funnel = new Funnel(new FunnelIO() {});
-        // climber = new Climber(new ClimberIO() {});
+        leds = new Led(new LedIOSim());
+        elevator = new Elevator(new ElevatorIO() {});
+        arm = new Arm(new ArmIO() {});
+        cradle = new Cradle(new CradleIO() {});
+        funnel = new Funnel(new FunnelIO() {});
+        climber = new Climber(new ClimberIO() {});
         break;
 
       default:
         // Replayed robot, disable IO implementations
 
-        // leds = new Led(new LedIO() {});
-        // elevator = new Elevator(new ElevatorIO() {});
-        // arm = new Arm(new ArmIO() {});
-        // cradle = new Cradle(new CradleIO() {});
-        // funnel = new Funnel(new FunnelIO() {});
-        // climber = new Climber(new ClimberIO() {});
+        leds = new Led(new LedIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
+        arm = new Arm(new ArmIO() {});
+        cradle = new Cradle(new CradleIO() {});
+        funnel = new Funnel(new FunnelIO() {});
+        climber = new Climber(new ClimberIO() {});
         break;
     }
 
-    // ledCommands =
-    //     new Command[] {
-    //       new LedRed(leds),
-    //       new LedGreen(leds),
-    //       new LedBlue(leds),
-    //       new LedOff(leds),
-    //       new LedWhite(leds),
-    //       new LedYellow(leds),
-    //       new LedCian(leds),
-    //       new LedRainbow(leds)
-    //     };
+    ledCommands =
+        new Command[] {
+          new LedRed(leds),
+          new LedGreen(leds),
+          new LedBlue(leds),
+          new LedOff(leds),
+          new LedWhite(leds),
+          new LedYellow(leds),
+          new LedCian(leds),
+          new LedRainbow(leds)
+        };
 
     // climb = new Trigger(() -> (driveController.getRightTriggerAxis() >= 0.4));
     // reverseClimb = new Trigger(() -> (driveController.getLeftTriggerAxis() >= 0.4));
@@ -221,7 +221,8 @@ public class RobotContainer {
             new InstantCommand(() -> drivebase.resetOdometry(new Pose2d(drivebase.getPose().getTranslation(), new Rotation2d()))));
 
 
-    driveController.y().onTrue(new PathPlannerAuto("Autotestal"));
+    driveController.leftBumper().whileTrue(drivebase.driveToPose(FieldConstants.ReefPoses.A_BLUE));
+    driveController.rightBumper().whileTrue(drivebase.driveToPose(FieldConstants.ReefPoses.B_BLUE));
 
     // // leds
     // operatorController
@@ -237,14 +238,14 @@ public class RobotContainer {
 
     // operatorController.b().onTrue(new L2(arm, elevator, cradle));
 
-    // operatorController.x().onTrue(new L3(arm, elevator, cradle));
+    driveController.x().onTrue(new L3(arm, elevator, cradle));
 
     // operatorController.y().onTrue(new L4(arm, elevator, cradle));
 
     // operatorController.povDown().onTrue(new L0(arm, elevator, cradle));
 
-    // operatorController.povLeft().onTrue(new DeliveryCoral(cradle));
-    // operatorController.povRight().onTrue(new IntakeCoral(cradle, funnel));
+    driveController.povLeft().onTrue(new DeliveryCoral(cradle));
+    driveController.povRight().onTrue(new IntakeCoral(cradle, funnel));
     // operatorController
     //     .povUp()
     //     .onTrue(new InstantCommand(() -> cradle.setInverted(CradleConstants.INTAKE_ADJUST),

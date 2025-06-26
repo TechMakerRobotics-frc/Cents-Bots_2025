@@ -26,6 +26,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -45,6 +46,7 @@ import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates;
 import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates.Zones;
 import frc.robot.subsystems.vision.LimelightHelpers;
+import frc.robot.subsystems.vision.LimelightHelpers.LimelightTarget_Fiducial;
 import frc.robot.util.Circle2d;
 import frc.robot.util.LocalADStarAK;
 // import frc.robot.subsystems.swervedrivedrive.Vision.Cameras;
@@ -183,9 +185,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // When vision is enabled we must manually update odometry in SwerveDrive
-    swerveDrive.updateOdometry();
-
     Pose2d visionPose;
     double timestamp;
     LimelightHelpers.SetIMUMode("limelight-left", 0);
@@ -200,23 +199,23 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveDrive.getRobotVelocity().omegaRadiansPerSecond < (Math.PI/4) 
     ) {
 
-      //if (!(getPose().getTranslation().getDistance(LimelightHelpers.getBotPose2d_wpiBlue("limelight-left").getTranslation()) > 0.2)) {
-        if (!useMegatag2) {
-          visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
-        } else {
-          if(DriverStation.getAlliance().get()==Alliance.Red){
-            LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees()-180, 0, 0, 0, 0, 0);
-            visionPose = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left").pose;
-          }
-          else{
-            LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
-            visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
-          }
+    if (!useMegatag2) {
+      visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
+    } else {
+      if(DriverStation.getAlliance().get()==Alliance.Red){
+        LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees()-180, 0, 0, 0, 0, 0);
+        visionPose = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left").pose;
       }
-
-        swerveDrive.addVisionMeasurement(visionPose, timestamp);
-      //}
+      else{
+        LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
+      }
     }
+        swerveDrive.addVisionMeasurement(visionPose, timestamp);
+    }
+
+    // When vision is enabled we must manually update odometry in SwerveDrive
+    swerveDrive.updateOdometry();
   }
 
   @Override
@@ -233,7 +232,7 @@ public class SwerveSubsystem extends SubsystemBase {
         new PPHolonomicDriveController(
             new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(8, 0.0, 0.0)),
         PP_CONFIG,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue,
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
@@ -296,10 +295,10 @@ public class SwerveSubsystem extends SubsystemBase {
     // Create the constraints to use while pathfinding
     PathConstraints constraints =
         new PathConstraints(
-            1.5,
+            Constants.MAX_SPEED,
             1.2,
-            swerveDrive.getMaximumChassisAngularVelocity(),
-            Units.degreesToRadians(400));
+            Units.rotationsPerMinuteToRadiansPerSecond(1/8),
+            Units.rotationsPerMinuteToRadiansPerSecond(1/8));
 
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     return AutoBuilder.pathfindToPose(
