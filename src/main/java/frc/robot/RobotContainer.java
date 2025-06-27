@@ -32,7 +32,7 @@ import frc.robot.subsystems.led.LedIO;
 import frc.robot.subsystems.led.LedIOReal;
 import frc.robot.subsystems.led.LedIOSim;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
-import frc.robot.util.FieldConstants;
+import frc.robot.util.FieldConstants.ReefPoses;
 
 import java.io.File;
 import org.ironmaple.simulation.SimulatedArena;
@@ -187,8 +187,8 @@ public class RobotContainer {
             new InstantCommand(() -> drivebase.resetOdometry(new Pose2d(drivebase.getPose().getTranslation(), new Rotation2d()))));
 
 
-    driveController.leftBumper().whileTrue(drivebase.driveToPose(FieldConstants.ReefPoses.A_BLUE));
-    driveController.rightBumper().whileTrue(drivebase.driveToPose(FieldConstants.ReefPoses.B_BLUE));
+    driveController.leftBumper().whileTrue(drivebase.driveToPose(drivebase.getPose().nearest(ReefPoses.LEFT_SIDE_BRANCHES_BLUE)));
+    driveController.rightBumper().whileTrue(drivebase.driveToPose(drivebase.getPose().nearest(ReefPoses.RIGHT_SIDE_BRANCHES_BLUE)));
 
     // leds
     operatorController
