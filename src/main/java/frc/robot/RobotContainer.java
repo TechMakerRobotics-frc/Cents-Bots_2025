@@ -204,7 +204,7 @@ public class RobotContainer {
 
     operatorController.b().onTrue(new L2(arm, elevator, cradle));
 
-    operatorController.x().onTrue(new L3(arm, elevator, cradle));
+    driveController.x().onTrue(new L3(arm, elevator, cradle));
 
     operatorController.y().onTrue(new L4(arm, elevator, cradle));
 
