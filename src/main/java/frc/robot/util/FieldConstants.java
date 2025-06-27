@@ -27,12 +27,12 @@ public class FieldConstants {
 
     /** Position A on the blue alliance side. */
     public static final Pose2d A_BLUE =
-        new Pose2d(3.279082775115967, 4.14, new Rotation2d(Units.degreesToRadians(0)));
+        new Pose2d(3.035, 4.14, new Rotation2d(Units.degreesToRadians(0)));
 
     /** Position B on the blue alliance side. */
     public static final Pose2d B_BLUE =
         new Pose2d(
-            3.279082775115967, 3.8, new Rotation2d(Units.degreesToRadians(0)));
+            3.035, 3.83, new Rotation2d(Units.degreesToRadians(0)));
 
     /** Position C on the blue alliance side. */
     public static final Pose2d C_BLUE =

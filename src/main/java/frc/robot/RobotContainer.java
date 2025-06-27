@@ -200,15 +200,15 @@ public class RobotContainer {
                   Command nextCommand = ledCommands[currentLedState];
                   nextCommand.schedule();
                 }));
-    operatorController.a().onTrue(new L1(arm, elevator, cradle));
+    driveController.a().onTrue(new L1(arm, elevator, cradle));
 
-    operatorController.b().onTrue(new L2(arm, elevator, cradle));
+    driveController.b().onTrue(new L2(arm, elevator, cradle));
 
     driveController.x().onTrue(new L3(arm, elevator, cradle));
 
-    operatorController.y().onTrue(new L4(arm, elevator, cradle));
+    driveController.y().onTrue(new L4(arm, elevator, cradle));
 
-    operatorController.povDown().onTrue(new L0(arm, elevator, cradle));
+    driveController.povDown().onTrue(new L0(arm, elevator, cradle));
 
     driveController.povLeft().onTrue(new DeliveryCoral(cradle));
     driveController.povRight().onTrue(new IntakeCoral(cradle, funnel));

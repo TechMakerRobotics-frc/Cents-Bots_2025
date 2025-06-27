@@ -295,8 +295,8 @@ public class SwerveSubsystem extends SubsystemBase {
         new PathConstraints(
             Constants.MAX_SPEED,
             1.2,
-            Units.rotationsPerMinuteToRadiansPerSecond(1/8),
-            Units.rotationsPerMinuteToRadiansPerSecond(1/8));
+            Units.rotationsPerMinuteToRadiansPerSecond(1/12),
+            Units.rotationsPerMinuteToRadiansPerSecond(1/12));
 
     // Since AutoBuilder is configured, we can use it to build pathfinding commands
     return AutoBuilder.pathfindToPose(
