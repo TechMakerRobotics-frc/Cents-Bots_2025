@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
+import frc.robot.commands.drive.GoToFieldPose;
 import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates;
 import frc.robot.subsystems.swervedrive.DriveConstants.ZoneLocates.Zones;
 import frc.robot.subsystems.vision.LimelightHelpers;
@@ -284,27 +285,41 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * Use PathPlanner Path finding to go to a point on the field.
+   * Creates a command to drive this robot to the given field-relative pose.
+   * <p>
+   * If the target is more than 0.5 m away, uses PathPlanner’s full pathfinding
+   * (with trapezoidal velocity & acceleration constraints) and ends with
+   * zero velocity. Otherwise, uses the simple {@link GoToFieldPose} command
+   * for short, direct moves with the same constraints.
    *
-   * @param pose Target {@link Pose2d} to go to.
-   * @return PathFinding command
+   * @param pose
+   *     The absolute target {@link Pose2d} on the field.
+   * @return a {@link Command} that will drive the robot to the specified pose,
+   *         choosing between PathPlanner pathfinding or a direct profiled move
+   *         based on distance.
    */
   public Command driveToPose(Pose2d pose) {
-    // Create the constraints to use while pathfinding
     PathConstraints constraints =
         new PathConstraints(
-            Constants.MAX_SPEED,
-            1.2,
-            Units.rotationsPerMinuteToRadiansPerSecond(1/12),
-            Units.rotationsPerMinuteToRadiansPerSecond(1/12));
-
-    // Since AutoBuilder is configured, we can use it to build pathfinding commands
-    return AutoBuilder.pathfindToPose(
-        pose,
-        constraints,
-        edu.wpi.first.units.Units.MetersPerSecond.of(0) // Goal end velocity in meters/sec
+            Constants.MAX_SPEED,                                       // max linear velocity (m/s)
+            1.2,                                  // max linear acceleration (m/s²)
+            Units.rotationsPerMinuteToRadiansPerSecond(1.0 / 12.0),    // max angular velocity (rad/s)
+            Units.rotationsPerMinuteToRadiansPerSecond(1.0 / 12.0)     // max angular acceleration (rad/s²)
         );
+
+    // If the target is farther than 0.5 m, use full pathfinding + end at zero speed
+    if (getPose().getTranslation().getDistance(pose.getTranslation()) > 0.5) {
+      return AutoBuilder.pathfindToPose(
+          pose,
+          constraints,
+          edu.wpi.first.units.Units.MetersPerSecond.of(0) // goal end velocity (m/s)
+      );
+    }
+
+    // Otherwise, use the simpler profiled move for short distances
+    return new GoToFieldPose(this, pose, constraints);
   }
+
 
   /**
    * Drive with {@link SwerveSetpointGenerator} from 254, implemented by PathPlanner.
