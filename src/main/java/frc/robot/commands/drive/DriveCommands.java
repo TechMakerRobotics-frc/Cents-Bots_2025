@@ -139,55 +139,62 @@ public class DriveCommands {
   }
 
   public static Command joystickDriveHeading(
-      SwerveSubsystem drive,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier rotationXSupplier,
-      DoubleSupplier rotationYSupplier) {
+    SwerveSubsystem drive,
+    DoubleSupplier xSupplier,
+    DoubleSupplier ySupplier,
+    DoubleSupplier rotationXSupplier,
+    DoubleSupplier rotationYSupplier) {
 
-    ProfiledPIDController angleController =
-        new ProfiledPIDController(
-            ANGLE_KP,
-            0.0,
-            ANGLE_KD,
-            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-    angleController.enableContinuousInput(-Math.PI, Math.PI);
+  ProfiledPIDController angleController =
+      new ProfiledPIDController(
+          ANGLE_KP,
+          0.0,
+          ANGLE_KD,
+          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+  angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-    return Commands.run(
-            () -> {
-              // Obter a velocidade linear
-              Translation2d linearVelocity =
-                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+  Rotation2d[] lastTargetAngle = {drive.getRotation()};
 
-              // Calcular o ângulo desejado a partir dos inputs do Right Axis
-              double rotationX = MathUtil.applyDeadband(rotationXSupplier.getAsDouble(), DEADBAND);
-              double rotationY = MathUtil.applyDeadband(rotationYSupplier.getAsDouble(), DEADBAND);
-              Rotation2d targetRotation = new Rotation2d(Math.atan2(rotationY, rotationX));
+  return Commands.run(
+          () -> {
+            // Obter a velocidade linear
+            Translation2d linearVelocity =
+                getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-              // Calcular a velocidade angular com um controlador PID
-              double omega =
-                  angleController.calculate(
-                      drive.getRotation().getRadians(), targetRotation.getRadians());
+            // Calcular o ângulo desejado a partir dos inputs do Right Axis
+            double rotationX = MathUtil.applyDeadband(rotationXSupplier.getAsDouble(), DEADBAND);
+            double rotationY = MathUtil.applyDeadband(rotationYSupplier.getAsDouble(), DEADBAND);
 
-              // Converter para velocidades relativas ao campo e enviar comando
-              ChassisSpeeds speeds =
-                  new ChassisSpeeds(
-                      linearVelocity.getX() * Constants.MAX_SPEED,
-                      linearVelocity.getY() * Constants.MAX_SPEED,
-                      omega);
-              boolean isFlipped =
-                  DriverStation.getAlliance().isPresent()
-                      && DriverStation.getAlliance().get() == Alliance.Red;
-              speeds =
-                  ChassisSpeeds.fromFieldRelativeSpeeds(
-                      speeds,
-                      isFlipped
-                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                          : drive.getRotation());
-              drive.drive(speeds);
-            },
-            drive)
-        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+            if (Math.abs(rotationX) > DEADBAND || Math.abs(rotationY) > DEADBAND) {
+              lastTargetAngle[0] = new Rotation2d(Math.atan2(rotationY, rotationX));
+            }
+
+            Rotation2d targetRotation = lastTargetAngle[0];
+
+            // Calcular a velocidade angular com um controlador PID
+            double omega =
+                angleController.calculate(
+                    drive.getRotation().getRadians(), targetRotation.getRadians());
+
+            // Converter para velocidades relativas ao campo e enviar comando
+            ChassisSpeeds speeds =
+                new ChassisSpeeds(
+                    linearVelocity.getX() * Constants.MAX_SPEED,
+                    linearVelocity.getY() * Constants.MAX_SPEED,
+                    omega);
+            boolean isFlipped =
+                DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red;
+            speeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    speeds,
+                    isFlipped
+                        ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                        : drive.getRotation());
+            drive.drive(speeds);
+          },
+          drive)
+      .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
   public static Command joystickDriveHeadingReef(
