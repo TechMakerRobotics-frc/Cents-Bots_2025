@@ -38,6 +38,9 @@ public class DriveConstants {
   public static final Voltage kSteerFrictionVoltage = Volts.of(0.25);
   public static final Voltage kDriveFrictionVoltage = Volts.of(0.25);
 
+  public static final double ROBOT_MASS_KG = 51;
+  public static final double WHEEL_COF = 1.2;
+
   public static final int PIGEON_ID = 14;
 
   // Modules:

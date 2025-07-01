@@ -5,8 +5,11 @@
 package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Kilograms;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -57,6 +60,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.json.simple.parser.ParseException;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -86,24 +94,41 @@ public class SwerveSubsystem extends SubsystemBase {
    */
 
   // PathPlanner config constants
-  private static final double ROBOT_MASS_KG = 51;
 
   private static final double TIPPING_THRESHOLD = 3;
   private static final double ROBOT_MOI = 4.4679;
-  private static final double WHEEL_COF = 1.2;
 
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
-          ROBOT_MASS_KG,
+          DriveConstants.ROBOT_MASS_KG,
           ROBOT_MOI,
           new ModuleConfig(
               DriveConstants.kWheelRadius.in(Meters),
               Constants.MAX_SPEED,
-              WHEEL_COF,
+              DriveConstants.WHEEL_COF,
               DCMotor.getKrakenX60(1).withReduction(DriveConstants.DRIVE_GEAR_RATIO),
               DriveConstants.kSlipCurrent.in(Amps),
               1),
           getModuleTranslations());
+
+  public static final DriveTrainSimulationConfig mapleSimConfig =
+    DriveTrainSimulationConfig.Default()
+        .withRobotMass(Kilograms.of(DriveConstants.ROBOT_MASS_KG))
+        .withCustomModuleTranslations(getModuleTranslations())
+        .withGyro(COTS.ofPigeon2())
+        .withSwerveModule(
+            () ->
+                new SwerveModuleSimulation(
+                    new SwerveModuleSimulationConfig(
+                        DCMotor.getKrakenX60(1),
+                        DCMotor.getNEO(1),
+                        DriveConstants.DRIVE_GEAR_RATIO,
+                        DriveConstants.TURN_GEAR_RATIO,
+                        Volts.of(DriveConstants.kDriveFrictionVoltage.in(Volts)),
+                        Volts.of(DriveConstants.kSteerFrictionVoltage.in(Volts)),
+                        Meters.of(DriveConstants.kWheelRadius.in(Meters)),
+                        KilogramSquareMeters.of(DriveConstants.kSteerInertia),
+                        DriveConstants.WHEEL_COF)));
 
   private boolean useMegatag2 = true;
 
