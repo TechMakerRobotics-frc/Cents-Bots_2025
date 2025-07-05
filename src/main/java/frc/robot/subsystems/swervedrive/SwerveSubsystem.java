@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.ironmaple.simulation.drivesims.COTS;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
@@ -96,6 +95,7 @@ public class SwerveSubsystem extends SubsystemBase {
   // PathPlanner config constants
 
   private static final double TIPPING_THRESHOLD = 3;
+
   private static final double ROBOT_MOI = 4.4679;
 
   private static final RobotConfig PP_CONFIG =
@@ -112,23 +112,23 @@ public class SwerveSubsystem extends SubsystemBase {
           getModuleTranslations());
 
   public static final DriveTrainSimulationConfig mapleSimConfig =
-    DriveTrainSimulationConfig.Default()
-        .withRobotMass(Kilograms.of(DriveConstants.ROBOT_MASS_KG))
-        .withCustomModuleTranslations(getModuleTranslations())
-        .withGyro(COTS.ofPigeon2())
-        .withSwerveModule(
-            () ->
-                new SwerveModuleSimulation(
-                    new SwerveModuleSimulationConfig(
-                        DCMotor.getKrakenX60(1),
-                        DCMotor.getNEO(1),
-                        DriveConstants.DRIVE_GEAR_RATIO,
-                        DriveConstants.TURN_GEAR_RATIO,
-                        Volts.of(DriveConstants.kDriveFrictionVoltage.in(Volts)),
-                        Volts.of(DriveConstants.kSteerFrictionVoltage.in(Volts)),
-                        Meters.of(DriveConstants.kWheelRadius.in(Meters)),
-                        KilogramSquareMeters.of(DriveConstants.kSteerInertia),
-                        DriveConstants.WHEEL_COF)));
+      DriveTrainSimulationConfig.Default()
+          .withRobotMass(Kilograms.of(DriveConstants.ROBOT_MASS_KG))
+          .withCustomModuleTranslations(getModuleTranslations())
+          .withGyro(COTS.ofPigeon2())
+          .withSwerveModule(
+              () ->
+                  new SwerveModuleSimulation(
+                      new SwerveModuleSimulationConfig(
+                          DCMotor.getKrakenX60(1),
+                          DCMotor.getNEO(1),
+                          DriveConstants.DRIVE_GEAR_RATIO,
+                          DriveConstants.TURN_GEAR_RATIO,
+                          Volts.of(DriveConstants.kDriveFrictionVoltage.in(Volts)),
+                          Volts.of(DriveConstants.kSteerFrictionVoltage.in(Volts)),
+                          Meters.of(DriveConstants.kWheelRadius.in(Meters)),
+                          KilogramSquareMeters.of(DriveConstants.kSteerInertia),
+                          DriveConstants.WHEEL_COF)));
 
   private boolean useMegatag2 = true;
 
@@ -212,30 +212,30 @@ public class SwerveSubsystem extends SubsystemBase {
     Pose2d visionPose;
     double timestamp;
     LimelightHelpers.SetIMUMode("limelight-left", 0);
-    timestamp = LimelightHelpers.getLatency_Capture("limelight-left") 
-    + LimelightHelpers.getLatency_Pipeline("limelight-left");
+    timestamp =
+        LimelightHelpers.getLatency_Capture("limelight-left")
+            + LimelightHelpers.getLatency_Pipeline("limelight-left");
     timestamp = Timer.getFPGATimestamp() - (timestamp / 1000.0);
 
-    if (
-      LimelightHelpers.getTV("limelight-left") && 
-      swerveDrive.getRobotVelocity().vxMetersPerSecond < 2 &&
-      swerveDrive.getRobotVelocity().vyMetersPerSecond < 2 &&
-      swerveDrive.getRobotVelocity().omegaRadiansPerSecond < (Math.PI/4) 
-    ) {
+    if (LimelightHelpers.getTV("limelight-left")
+        && swerveDrive.getRobotVelocity().vxMetersPerSecond < 2
+        && swerveDrive.getRobotVelocity().vyMetersPerSecond < 2
+        && swerveDrive.getRobotVelocity().omegaRadiansPerSecond < (Math.PI / 4)) {
 
-    if (!useMegatag2) {
-      visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
-    } else {
-      if(DriverStation.getAlliance().get()==Alliance.Red){
-        LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees()-180, 0, 0, 0, 0, 0);
-        visionPose = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left").pose;
+      if (!useMegatag2) {
+        visionPose = LimelightHelpers.getBotPose2d_wpiBlue("limelight-left");
+      } else {
+        if (DriverStation.getAlliance().get() == Alliance.Red) {
+          LimelightHelpers.SetRobotOrientation(
+              "limelight-left", getRotation().getDegrees() - 180, 0, 0, 0, 0, 0);
+          visionPose = LimelightHelpers.getBotPoseEstimate_wpiRed_MegaTag2("limelight-left").pose;
+        } else {
+          LimelightHelpers.SetRobotOrientation(
+              "limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
+          visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
+        }
       }
-      else{
-        LimelightHelpers.SetRobotOrientation("limelight-left", getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        visionPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-left").pose;
-      }
-    }
-        swerveDrive.addVisionMeasurement(visionPose, timestamp);
+      swerveDrive.addVisionMeasurement(visionPose, timestamp);
     }
 
     // When vision is enabled we must manually update odometry in SwerveDrive
@@ -311,26 +311,24 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /**
    * Creates a command to drive this robot to the given field-relative pose.
-   * <p>
-   * If the target is more than 0.5 m away, uses PathPlanner’s full pathfinding
-   * (with trapezoidal velocity & acceleration constraints) and ends with
-   * zero velocity. Otherwise, uses the simple {@link GoToFieldPose} command
-   * for short, direct moves with the same constraints.
    *
-   * @param pose
-   *     The absolute target {@link Pose2d} on the field.
-   * @return a {@link Command} that will drive the robot to the specified pose,
-   *         choosing between PathPlanner pathfinding or a direct profiled move
-   *         based on distance.
+   * <p>If the target is more than 0.5 m away, uses PathPlanner’s full pathfinding (with trapezoidal
+   * velocity & acceleration constraints) and ends with zero velocity. Otherwise, uses the simple
+   * {@link GoToFieldPose} command for short, direct moves with the same constraints.
+   *
+   * @param pose The absolute target {@link Pose2d} on the field.
+   * @return a {@link Command} that will drive the robot to the specified pose, choosing between
+   *     PathPlanner pathfinding or a direct profiled move based on distance.
    */
   public Command driveToPose(Pose2d pose) {
     PathConstraints constraints =
         new PathConstraints(
-            Constants.MAX_SPEED,                                       // max linear velocity (m/s)
-            1.2,                                  // max linear acceleration (m/s²)
-            Units.rotationsPerMinuteToRadiansPerSecond(1.0 / 12.0),    // max angular velocity (rad/s)
-            Units.rotationsPerMinuteToRadiansPerSecond(1.0 / 12.0)     // max angular acceleration (rad/s²)
-        );
+            Constants.MAX_SPEED, // max linear velocity (m/s)
+            1.2, // max linear acceleration (m/s²)
+            Units.rotationsPerMinuteToRadiansPerSecond(1.0 / 12.0), // max angular velocity (rad/s)
+            Units.rotationsPerMinuteToRadiansPerSecond(
+                1.0 / 12.0) // max angular acceleration (rad/s²)
+            );
 
     // If the target is farther than 0.5 m, use full pathfinding + end at zero speed
     if (getPose().getTranslation().getDistance(pose.getTranslation()) > 0.5) {
@@ -338,13 +336,12 @@ public class SwerveSubsystem extends SubsystemBase {
           pose,
           constraints,
           edu.wpi.first.units.Units.MetersPerSecond.of(0) // goal end velocity (m/s)
-      );
+          );
     }
 
     // Otherwise, use the simpler profiled move for short distances
     return new GoToFieldPose(this, pose, constraints);
   }
-
 
   /**
    * Drive with {@link SwerveSetpointGenerator} from 254, implemented by PathPlanner.

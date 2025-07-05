@@ -31,8 +31,7 @@ public class FieldConstants {
 
     /** Position B on the blue alliance side. */
     public static final Pose2d B_BLUE =
-        new Pose2d(
-            3.035, 3.83, new Rotation2d(Units.degreesToRadians(0)));
+        new Pose2d(3.035, 3.83, new Rotation2d(Units.degreesToRadians(0)));
 
     /** Position C on the blue alliance side. */
     public static final Pose2d C_BLUE =
@@ -107,23 +106,23 @@ public class FieldConstants {
     public static final Pose2d KL_BLUE =
         new Pose2d(3.534, 5.677, new Rotation2d(Units.degreesToRadians(-60)));
 
-    public static final List<Pose2d> RIGHT_SIDE_BRANCHES_BLUE = List.of(
-        ReefPoses.A_BLUE,
-        ReefPoses.C_BLUE,
-        ReefPoses.E_BLUE,
-        ReefPoses.G_BLUE,
-        ReefPoses.I_BLUE,
-        ReefPoses.K_BLUE
-    );
-        
-    public static final List<Pose2d> LEFT_SIDE_BRANCHES_BLUE = List.of(
-        ReefPoses.B_BLUE,
-        ReefPoses.D_BLUE,
-        ReefPoses.F_BLUE,
-        ReefPoses.H_BLUE,
-        ReefPoses.J_BLUE,
-        ReefPoses.L_BLUE
-    );    
+    public static final List<Pose2d> RIGHT_SIDE_BRANCHES_BLUE =
+        List.of(
+            ReefPoses.A_BLUE,
+            ReefPoses.C_BLUE,
+            ReefPoses.E_BLUE,
+            ReefPoses.G_BLUE,
+            ReefPoses.I_BLUE,
+            ReefPoses.K_BLUE);
+
+    public static final List<Pose2d> LEFT_SIDE_BRANCHES_BLUE =
+        List.of(
+            ReefPoses.B_BLUE,
+            ReefPoses.D_BLUE,
+            ReefPoses.F_BLUE,
+            ReefPoses.H_BLUE,
+            ReefPoses.J_BLUE,
+            ReefPoses.L_BLUE);
 
     /** Position A on the red alliance side (mirrored from A_BLUE). */
     public static final Pose2d A_RED = GeomUtil.flip(A_BLUE);

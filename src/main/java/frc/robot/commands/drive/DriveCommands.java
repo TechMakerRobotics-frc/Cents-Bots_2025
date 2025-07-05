@@ -139,62 +139,62 @@ public class DriveCommands {
   }
 
   public static Command joystickDriveHeading(
-    SwerveSubsystem drive,
-    DoubleSupplier xSupplier,
-    DoubleSupplier ySupplier,
-    DoubleSupplier rotationXSupplier,
-    DoubleSupplier rotationYSupplier) {
+      SwerveSubsystem drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier rotationXSupplier,
+      DoubleSupplier rotationYSupplier) {
 
-  ProfiledPIDController angleController =
-      new ProfiledPIDController(
-          ANGLE_KP,
-          0.0,
-          ANGLE_KD,
-          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
-  angleController.enableContinuousInput(-Math.PI, Math.PI);
+    ProfiledPIDController angleController =
+        new ProfiledPIDController(
+            ANGLE_KP,
+            0.0,
+            ANGLE_KD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    angleController.enableContinuousInput(-Math.PI, Math.PI);
 
-  Rotation2d[] lastTargetAngle = {drive.getRotation()};
+    Rotation2d[] lastTargetAngle = {drive.getRotation()};
 
-  return Commands.run(
-          () -> {
-            // Obter a velocidade linear
-            Translation2d linearVelocity =
-                getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+    return Commands.run(
+            () -> {
+              // Obter a velocidade linear
+              Translation2d linearVelocity =
+                  getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
 
-            // Calcular o ângulo desejado a partir dos inputs do Right Axis
-            double rotationX = MathUtil.applyDeadband(rotationXSupplier.getAsDouble(), DEADBAND);
-            double rotationY = MathUtil.applyDeadband(rotationYSupplier.getAsDouble(), DEADBAND);
+              // Calcular o ângulo desejado a partir dos inputs do Right Axis
+              double rotationX = MathUtil.applyDeadband(rotationXSupplier.getAsDouble(), DEADBAND);
+              double rotationY = MathUtil.applyDeadband(rotationYSupplier.getAsDouble(), DEADBAND);
 
-            if (Math.abs(rotationX) > DEADBAND || Math.abs(rotationY) > DEADBAND) {
-              lastTargetAngle[0] = new Rotation2d(Math.atan2(rotationY, rotationX));
-            }
+              if (Math.abs(rotationX) > DEADBAND || Math.abs(rotationY) > DEADBAND) {
+                lastTargetAngle[0] = new Rotation2d(Math.atan2(rotationY, rotationX));
+              }
 
-            Rotation2d targetRotation = lastTargetAngle[0];
+              Rotation2d targetRotation = lastTargetAngle[0];
 
-            // Calcular a velocidade angular com um controlador PID
-            double omega =
-                angleController.calculate(
-                    drive.getRotation().getRadians(), targetRotation.getRadians());
+              // Calcular a velocidade angular com um controlador PID
+              double omega =
+                  angleController.calculate(
+                      drive.getRotation().getRadians(), targetRotation.getRadians());
 
-            // Converter para velocidades relativas ao campo e enviar comando
-            ChassisSpeeds speeds =
-                new ChassisSpeeds(
-                    linearVelocity.getX() * Constants.MAX_SPEED,
-                    linearVelocity.getY() * Constants.MAX_SPEED,
-                    omega);
-            boolean isFlipped =
-                DriverStation.getAlliance().isPresent()
-                    && DriverStation.getAlliance().get() == Alliance.Red;
-            speeds =
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    speeds,
-                    isFlipped
-                        ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                        : drive.getRotation());
-            drive.drive(speeds);
-          },
-          drive)
-      .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+              // Converter para velocidades relativas ao campo e enviar comando
+              ChassisSpeeds speeds =
+                  new ChassisSpeeds(
+                      linearVelocity.getX() * Constants.MAX_SPEED,
+                      linearVelocity.getY() * Constants.MAX_SPEED,
+                      omega);
+              boolean isFlipped =
+                  DriverStation.getAlliance().isPresent()
+                      && DriverStation.getAlliance().get() == Alliance.Red;
+              speeds =
+                  ChassisSpeeds.fromFieldRelativeSpeeds(
+                      speeds,
+                      isFlipped
+                          ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                          : drive.getRotation());
+              drive.drive(speeds);
+            },
+            drive)
+        .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
 
   public static Command joystickDriveHeadingReef(
@@ -408,80 +408,83 @@ public class DriveCommands {
   }
 
   public static Command joystickDriveTowardsPoint(
-    SwerveSubsystem drive,
-    DoubleSupplier xSupplier,
-    DoubleSupplier ySupplier,
-    DoubleSupplier omegaSupplier,
-    double targetX,
-    double targetY) {
+      SwerveSubsystem drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier,
+      double targetX,
+      double targetY) {
 
-  final double baseTargetWeight = 0.3;
-  final double maxEffectiveDistance = 2.0; // metros
-  final double slowRadius = 0.4; // freio suave se estiver perto
+    final double baseTargetWeight = 0.3;
+    final double maxEffectiveDistance = 2.0; // metros
+    final double slowRadius = 0.4; // freio suave se estiver perto
 
-  return Commands.run(
-      () -> {
-        double joystickX = xSupplier.getAsDouble();
-        double joystickY = ySupplier.getAsDouble();
+    return Commands.run(
+        () -> {
+          double joystickX = xSupplier.getAsDouble();
+          double joystickY = ySupplier.getAsDouble();
 
-        // Deadband e processamento de rotação manual
-        double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-        omega = Math.copySign(omega * omega, omega);
+          // Deadband e processamento de rotação manual
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+          omega = Math.copySign(omega * omega, omega);
 
-        joystickX = MathUtil.applyDeadband(joystickX, DEADBAND);
-        joystickY = MathUtil.applyDeadband(joystickY, DEADBAND);
+          joystickX = MathUtil.applyDeadband(joystickX, DEADBAND);
+          joystickY = MathUtil.applyDeadband(joystickY, DEADBAND);
 
-        Pose2d currentPose = drive.getPose();
-        double dx = targetX - currentPose.getX();
-        double dy = targetY - currentPose.getY();
+          Pose2d currentPose = drive.getPose();
+          double dx = targetX - currentPose.getX();
+          double dy = targetY - currentPose.getY();
 
-        double distanceToTarget = Math.hypot(dx, dy);
+          double distanceToTarget = Math.hypot(dx, dy);
 
-        // Vetor normalizado
-        double tx = 0, ty = 0;
-        if (distanceToTarget > 0.01) {
-          tx = dx / distanceToTarget;
-          ty = dy / distanceToTarget;
-        }
+          // Vetor normalizado
+          double tx = 0, ty = 0;
+          if (distanceToTarget > 0.01) {
+            tx = dx / distanceToTarget;
+            ty = dy / distanceToTarget;
+          }
 
-        // Peso dinâmico
-        double dynamicWeight = baseTargetWeight * Math.min(distanceToTarget / maxEffectiveDistance, 1.0);
+          // Peso dinâmico
+          double dynamicWeight =
+              baseTargetWeight * Math.min(distanceToTarget / maxEffectiveDistance, 1.0);
 
-        double blendedX = (1 - dynamicWeight) * joystickX + dynamicWeight * tx;
-        double blendedY = (1 - dynamicWeight) * joystickY + dynamicWeight * ty;
+          double blendedX = (1 - dynamicWeight) * joystickX + dynamicWeight * tx;
+          double blendedY = (1 - dynamicWeight) * joystickY + dynamicWeight * ty;
 
-        double blendedMagnitude = Math.hypot(blendedX, blendedY);
-        if (blendedMagnitude > 1.0) {
-          blendedX /= blendedMagnitude;
-          blendedY /= blendedMagnitude;
-        }
+          double blendedMagnitude = Math.hypot(blendedX, blendedY);
+          if (blendedMagnitude > 1.0) {
+            blendedX /= blendedMagnitude;
+            blendedY /= blendedMagnitude;
+          }
 
-        // Freio vetorial se muito perto
-        if (distanceToTarget < slowRadius) {
-          double scale = distanceToTarget / slowRadius;
-          blendedX *= scale;
-          blendedY *= scale;
-        }
+          // Freio vetorial se muito perto
+          if (distanceToTarget < slowRadius) {
+            double scale = distanceToTarget / slowRadius;
+            blendedX *= scale;
+            blendedY *= scale;
+          }
 
-        boolean isFlipped =
-            DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Red;
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
 
-        if (joystickX == 0.0 && joystickY == 0.0) {
-          blendedX = 0;
-          blendedY = 0;
-        }
+          if (joystickX == 0.0 && joystickY == 0.0) {
+            blendedX = 0;
+            blendedY = 0;
+          }
 
-        ChassisSpeeds speeds =
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                blendedX * Constants.MAX_SPEED,
-                blendedY * Constants.MAX_SPEED,
-                omega * Constants.MAX_ANGULAR_SPEED,
-                isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI)) : drive.getRotation());
-        drive.drive(speeds);
-      },
-      drive);
-}
+          ChassisSpeeds speeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  blendedX * Constants.MAX_SPEED,
+                  blendedY * Constants.MAX_SPEED,
+                  omega * Constants.MAX_ANGULAR_SPEED,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation());
+          drive.drive(speeds);
+        },
+        drive);
+  }
 
   public static Command joystickDriveTowardsAimAtPoint(
       SwerveSubsystem drive,
@@ -567,67 +570,68 @@ public class DriveCommands {
   }
 
   public static Command joystickDriveWithZoneRepulsion(
-    SwerveSubsystem drive,
-    DoubleSupplier xSupplier,
-    DoubleSupplier ySupplier,
-    DoubleSupplier omegaSupplier,
-    Translation2d cornerA,
-    Translation2d cornerB,
-    double repulsionStrength) {
+      SwerveSubsystem drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier,
+      Translation2d cornerA,
+      Translation2d cornerB,
+      double repulsionStrength) {
 
     return Commands.run(
-      () -> {
-        double joyX = xSupplier.getAsDouble();
-        double joyY = ySupplier.getAsDouble();
+        () -> {
+          double joyX = xSupplier.getAsDouble();
+          double joyY = ySupplier.getAsDouble();
 
-        double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-        omega = Math.copySign(omega * omega, omega);
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+          omega = Math.copySign(omega * omega, omega);
 
-        joyX = MathUtil.applyDeadband(joyX, DEADBAND);
-        joyY = MathUtil.applyDeadband(joyY, DEADBAND);
+          joyX = MathUtil.applyDeadband(joyX, DEADBAND);
+          joyY = MathUtil.applyDeadband(joyY, DEADBAND);
 
-        Pose2d pose = drive.getPose();
-        double x = pose.getX();
-        double y = pose.getY();
+          Pose2d pose = drive.getPose();
+          double x = pose.getX();
+          double y = pose.getY();
 
-        double minX = Math.min(cornerA.getX(), cornerB.getX());
-        double maxX = Math.max(cornerA.getX(), cornerB.getX());
-        double minY = Math.min(cornerA.getY(), cornerB.getY());
-        double maxY = Math.max(cornerA.getY(), cornerB.getY());
+          double minX = Math.min(cornerA.getX(), cornerB.getX());
+          double maxX = Math.max(cornerA.getX(), cornerB.getX());
+          double minY = Math.min(cornerA.getY(), cornerB.getY());
+          double maxY = Math.max(cornerA.getY(), cornerB.getY());
 
-        Translation2d repulsion = new Translation2d();
+          Translation2d repulsion = new Translation2d();
 
-        if (x > minX && x < maxX && y > minY && y < maxY) {
-          // Calcular vetor de repulsão para fora do centro do retângulo
-          Translation2d center = new Translation2d((minX + maxX) / 2.0, (minY + maxY) / 2.0);
-          Translation2d delta = pose.getTranslation().minus(center);
-          double norm = delta.getNorm();
-          Translation2d directionOut = norm > 1e-6 ? delta.div(norm) : new Translation2d();
-                    repulsion = directionOut.times(repulsionStrength);
-        }
+          if (x > minX && x < maxX && y > minY && y < maxY) {
+            // Calcular vetor de repulsão para fora do centro do retângulo
+            Translation2d center = new Translation2d((minX + maxX) / 2.0, (minY + maxY) / 2.0);
+            Translation2d delta = pose.getTranslation().minus(center);
+            double norm = delta.getNorm();
+            Translation2d directionOut = norm > 1e-6 ? delta.div(norm) : new Translation2d();
+            repulsion = directionOut.times(repulsionStrength);
+          }
 
-        double vx = joyX + repulsion.getX();
-        double vy = joyY + repulsion.getY();
+          double vx = joyX + repulsion.getX();
+          double vy = joyY + repulsion.getY();
 
-        double magnitude = Math.hypot(vx, vy);
-        if (magnitude > 1.0) {
-          vx /= magnitude;
-          vy /= magnitude;
-        }
+          double magnitude = Math.hypot(vx, vy);
+          if (magnitude > 1.0) {
+            vx /= magnitude;
+            vy /= magnitude;
+          }
 
-        boolean isFlipped =
-            DriverStation.getAlliance().isPresent()
-                && DriverStation.getAlliance().get() == Alliance.Red;
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
 
-        ChassisSpeeds speeds =
-            ChassisSpeeds.fromFieldRelativeSpeeds(
-                vx * Constants.MAX_SPEED,
-                vy * Constants.MAX_SPEED,
-                omega * Constants.MAX_ANGULAR_SPEED,
-                isFlipped ? drive.getRotation().plus(new Rotation2d(Math.PI)) : drive.getRotation());
-        drive.drive(speeds);
-      },
-      drive
-    );
+          ChassisSpeeds speeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  vx * Constants.MAX_SPEED,
+                  vy * Constants.MAX_SPEED,
+                  omega * Constants.MAX_ANGULAR_SPEED,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation());
+          drive.drive(speeds);
+        },
+        drive);
   }
 }
