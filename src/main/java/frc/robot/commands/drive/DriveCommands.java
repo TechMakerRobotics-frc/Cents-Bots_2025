@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.util.ThrottleMap;
+
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -25,6 +27,7 @@ public class DriveCommands {
   private static final double ANGLE_MAX_VELOCITY = 8.0;
   private static final double ANGLE_MAX_ACCELERATION = 20.0;
   private static SlewRateLimiter xLimiter = new SlewRateLimiter(2);
+  private static SlewRateLimiter yLimiter = new SlewRateLimiter(2);
 
   private DriveCommands() {}
 
@@ -55,7 +58,7 @@ public class DriveCommands {
           // Get linear velocity
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(
-                  xLimiter.calculate(xSupplier.getAsDouble()), ySupplier.getAsDouble());
+                  xLimiter.calculate(xSupplier.getAsDouble()), yLimiter.calculate(ySupplier.getAsDouble()));
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
@@ -78,6 +81,59 @@ public class DriveCommands {
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
                       : drive.getRotation());
+          drive.drive(speeds);
+        },
+        drive);
+  }
+
+  /**
+   * Field-relative drive command using two joysticks (controlling linear and angular velocities),
+   * with throttle mapping applied to translational axes using an embedded spline curve.
+   */
+  public static Command joystickDriveThrottleMap(
+      SwerveSubsystem drive,
+      DoubleSupplier xSupplier,
+      DoubleSupplier ySupplier,
+      DoubleSupplier omegaSupplier) {
+
+    ThrottleMap translationMap = new ThrottleMap(
+        new double[] {0.0, 0.1, 0.6, 0.8, 1.0},
+        new double[] {0.0, 0.0, 0.3, 0.5, 1.0}
+    );
+
+    return Commands.run(
+        () -> {
+          // Apply throttle mapping to translational inputs
+          double x = translationMap.applyThrottleAbs(xSupplier.getAsDouble());
+          double y = translationMap.applyThrottleAbs(ySupplier.getAsDouble());
+
+          // Get linear velocity
+          Translation2d linearVelocity =
+          getLinearVelocityFromJoysticks(
+              xLimiter.calculate(x), yLimiter.calculate(y));
+
+          // Apply rotation deadband
+          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+
+          // Square rotation value for more precise control
+          omega = Math.copySign(omega * omega, omega);
+
+          // Convert to field-relative speeds & send command
+          ChassisSpeeds speeds = new ChassisSpeeds(
+              linearVelocity.getX() * Constants.MAX_SPEED,
+              linearVelocity.getY() * Constants.MAX_SPEED,
+              omega * Constants.MAX_ANGULAR_SPEED);
+
+          boolean isFlipped =
+              DriverStation.getAlliance().isPresent()
+                  && DriverStation.getAlliance().get() == Alliance.Red;
+
+          speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+              speeds,
+              isFlipped
+                  ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                  : drive.getRotation());
+
           drive.drive(speeds);
         },
         drive);
