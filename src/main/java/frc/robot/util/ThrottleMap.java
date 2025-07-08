@@ -1,19 +1,19 @@
 package frc.robot.util;
 
+import edu.wpi.first.math.MathUtil;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import edu.wpi.first.math.MathUtil;
 
 /**
- * Utility class that performs a throttle mapping using a piecewise linear spline.
- * This mapping adjusts the response curve of an input, typically from an analog control device,
- * to produce a smoother or more customized output behavior.
+ * Utility class that performs a throttle mapping using a piecewise linear spline. This mapping
+ * adjusts the response curve of an input, typically from an analog control device, to produce a
+ * smoother or more customized output behavior.
  *
- * The curve is defined by matching pairs of input and output values, which must be provided
- * in strictly increasing order for the input values. The mapping is applied using linear
- * interpolation between the defined points.
+ * <p>The curve is defined by matching pairs of input and output values, which must be provided in
+ * strictly increasing order for the input values. The mapping is applied using linear interpolation
+ * between the defined points.
  *
- * Input values outside the defined domain are clamped to the nearest bound.
+ * <p>Input values outside the defined domain are clamped to the nearest bound.
  */
 public class ThrottleMap {
   private final PolynomialSplineFunction throttleCurve;
@@ -21,10 +21,10 @@ public class ThrottleMap {
   private final double[] outputValues;
 
   /**
-   * Constructs a ThrottleMap using the specified input-output mapping curve.
-   * The arrays must be of equal length and the input values must be strictly increasing.
+   * Constructs a ThrottleMap using the specified input-output mapping curve. The arrays must be of
+   * equal length and the input values must be strictly increasing.
    *
-   * @param inputValues  Array of input domain values in ascending order.
+   * @param inputValues Array of input domain values in ascending order.
    * @param outputValues Array of output range values corresponding to each input.
    */
   public ThrottleMap(double[] inputValues, double[] outputValues) {
@@ -34,8 +34,8 @@ public class ThrottleMap {
   }
 
   /**
-   * Creates a piecewise linear spline using the defined input and output arrays.
-   * Each segment between two consecutive input values is represented as a first-degree polynomial.
+   * Creates a piecewise linear spline using the defined input and output arrays. Each segment
+   * between two consecutive input values is represented as a first-degree polynomial.
    *
    * @return A {@link PolynomialSplineFunction} representing the throttle curve.
    */
@@ -52,8 +52,8 @@ public class ThrottleMap {
   }
 
   /**
-   * Applies the throttle mapping to a non-negative input value.
-   * Values outside the domain are clamped to the nearest valid input.
+   * Applies the throttle mapping to a non-negative input value. Values outside the domain are
+   * clamped to the nearest valid input.
    *
    * @param input The input value to be mapped.
    * @return The mapped output value.
@@ -64,9 +64,8 @@ public class ThrottleMap {
   }
 
   /**
-   * Applies the throttle mapping to a signed input value.
-   * The absolute value is mapped using the throttle curve,
-   * and the original sign of the input is preserved in the result.
+   * Applies the throttle mapping to a signed input value. The absolute value is mapped using the
+   * throttle curve, and the original sign of the input is preserved in the result.
    *
    * @param input The signed input value.
    * @return The signed, mapped output value.

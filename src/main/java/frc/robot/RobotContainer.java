@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -13,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RobotState;
+import frc.robot.commands.drive.GoToFieldPose;
 import frc.robot.commands.leds.*;
 import frc.robot.commands.reef.*;
 import frc.robot.subsystems.arm.Arm;
@@ -38,6 +40,9 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
+
+import com.pathplanner.lib.path.PathConstraints;
+
 import swervelib.SwerveInputStream;
 
 /**
@@ -192,14 +197,30 @@ public class RobotContainer {
                     drivebase.resetOdometry(
                         new Pose2d(drivebase.getPose().getTranslation(), new Rotation2d()))));
 
+    // driveController
+    //     .leftBumper()
+    //     .whileTrue(
+    //         drivebase.driveToPose(drivebase.getPose().nearest(ReefPoses.LEFT_SIDE_BRANCHES_BLUE)));
+    // driveController
+    //     .rightBumper()
+    //     .whileTrue(
+    //         drivebase.driveToPose(drivebase.getPose().nearest(ReefPoses.RIGHT_SIDE_BRANCHES_BLUE)));
+
+    PathConstraints constraints = new PathConstraints(
+            3, // max linear velocity (m/s)
+            1, // max linear acceleration (m/s²)
+            Units.rotationsPerMinuteToRadiansPerSecond(30), // max angular velocity (rad/s)
+            Units.rotationsPerMinuteToRadiansPerSecond(
+                20) // max angular acceleration (rad/s²)
+            );
+
     driveController
         .leftBumper()
-        .whileTrue(
-            drivebase.driveToPose(drivebase.getPose().nearest(ReefPoses.LEFT_SIDE_BRANCHES_BLUE)));
+        .whileTrue(new GoToFieldPose(drivebase, ReefPoses.A_BLUE, constraints));
+
     driveController
         .rightBumper()
-        .whileTrue(
-            drivebase.driveToPose(drivebase.getPose().nearest(ReefPoses.RIGHT_SIDE_BRANCHES_BLUE)));
+        .whileTrue(new GoToFieldPose(drivebase, ReefPoses.B_BLUE, constraints));
 
     // leds
     operatorController

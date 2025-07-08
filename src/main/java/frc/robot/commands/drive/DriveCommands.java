@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.util.ThrottleMap;
-
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -58,7 +57,8 @@ public class DriveCommands {
           // Get linear velocity
           Translation2d linearVelocity =
               getLinearVelocityFromJoysticks(
-                  xLimiter.calculate(xSupplier.getAsDouble()), yLimiter.calculate(ySupplier.getAsDouble()));
+                  xLimiter.calculate(xSupplier.getAsDouble()),
+                  yLimiter.calculate(ySupplier.getAsDouble()));
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
@@ -96,10 +96,9 @@ public class DriveCommands {
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier) {
 
-    ThrottleMap translationMap = new ThrottleMap(
-        new double[] {0.0, 0.1, 0.6, 0.8, 1.0},
-        new double[] {0.0, 0.0, 0.3, 0.5, 1.0}
-    );
+    ThrottleMap translationMap =
+        new ThrottleMap(
+            new double[] {0.0, 0.1, 0.6, 0.8, 1.0}, new double[] {0.0, 0.0, 0.3, 0.5, 1.0});
 
     return Commands.run(
         () -> {
@@ -109,8 +108,7 @@ public class DriveCommands {
 
           // Get linear velocity
           Translation2d linearVelocity =
-          getLinearVelocityFromJoysticks(
-              xLimiter.calculate(x), yLimiter.calculate(y));
+              getLinearVelocityFromJoysticks(xLimiter.calculate(x), yLimiter.calculate(y));
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
@@ -119,20 +117,22 @@ public class DriveCommands {
           omega = Math.copySign(omega * omega, omega);
 
           // Convert to field-relative speeds & send command
-          ChassisSpeeds speeds = new ChassisSpeeds(
-              linearVelocity.getX() * Constants.MAX_SPEED,
-              linearVelocity.getY() * Constants.MAX_SPEED,
-              omega * Constants.MAX_ANGULAR_SPEED);
+          ChassisSpeeds speeds =
+              new ChassisSpeeds(
+                  linearVelocity.getX() * Constants.MAX_SPEED,
+                  linearVelocity.getY() * Constants.MAX_SPEED,
+                  omega * Constants.MAX_ANGULAR_SPEED);
 
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
                   && DriverStation.getAlliance().get() == Alliance.Red;
 
-          speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-              speeds,
-              isFlipped
-                  ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                  : drive.getRotation());
+          speeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  speeds,
+                  isFlipped
+                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                      : drive.getRotation());
 
           drive.drive(speeds);
         },

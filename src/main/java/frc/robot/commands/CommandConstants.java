@@ -47,7 +47,7 @@ public final class CommandConstants {
   }
 
   public static final class MoveHConstants {
-    public static final double k_P = 0.1;
+    public static final double k_P = 3;
     public static final double k_I = 0;
     public static final double k_D = 0;
   }
