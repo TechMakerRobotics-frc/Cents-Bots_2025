@@ -323,11 +323,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public Command driveToPose(Pose2d pose) {
     PathConstraints constraints =
         new PathConstraints(
-            Constants.MAX_SPEED, // max linear velocity (m/s)
+            3, // max linear velocity (m/s)
             1.2, // max linear acceleration (m/s²)
-            Units.rotationsPerMinuteToRadiansPerSecond(1.0 / 12.0), // max angular velocity (rad/s)
+            Units.rotationsPerMinuteToRadiansPerSecond(30), // max angular velocity (rad/s)
             Units.rotationsPerMinuteToRadiansPerSecond(
-                1.0 / 12.0) // max angular acceleration (rad/s²)
+                20) // max angular acceleration (rad/s²)
             );
 
     // If the target is farther than 0.5 m, use full pathfinding + end at zero speed

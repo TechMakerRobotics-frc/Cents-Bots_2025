@@ -34,6 +34,7 @@ import frc.robot.subsystems.led.LedIO;
 import frc.robot.subsystems.led.LedIOReal;
 import frc.robot.subsystems.led.LedIOSim;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.util.FieldConstants.CoralStationPoses;
 import frc.robot.util.FieldConstants.ReefPoses;
 import java.io.File;
 import org.ironmaple.simulation.SimulatedArena;
@@ -216,11 +217,15 @@ public class RobotContainer {
 
     driveController
         .leftBumper()
-        .whileTrue(new GoToFieldPose(drivebase, ReefPoses.A_BLUE, constraints));
+        .whileTrue(drivebase.driveToPose(ReefPoses.A_BLUE));
 
     driveController
         .rightBumper()
-        .whileTrue(new GoToFieldPose(drivebase, ReefPoses.B_BLUE, constraints));
+        .whileTrue(drivebase.driveToPose(ReefPoses.B_BLUE));
+
+    driveController
+        .povUp()
+        .whileTrue(drivebase.driveToPose(CoralStationPoses.RIGHT_BLUE));
 
     // leds
     operatorController

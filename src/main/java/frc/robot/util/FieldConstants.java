@@ -27,11 +27,11 @@ public class FieldConstants {
 
     /** Position A on the blue alliance side. */
     public static final Pose2d A_BLUE =
-        new Pose2d(3.06, 4.08, new Rotation2d(Units.degreesToRadians(0)));
+        new Pose2d(3.13, 4.08, new Rotation2d(Units.degreesToRadians(0)));
 
     /** Position B on the blue alliance side. */
     public static final Pose2d B_BLUE =
-        new Pose2d(3.06, 3.77, new Rotation2d(Units.degreesToRadians(0)));
+        new Pose2d(3.13, 3.77, new Rotation2d(Units.degreesToRadians(0)));
 
     /** Position C on the blue alliance side. */
     public static final Pose2d C_BLUE =
@@ -195,7 +195,7 @@ public class FieldConstants {
     /** The right coral station pose for the blue alliance. */
     public static final Pose2d RIGHT_BLUE =
         new Pose2d(
-            1.464130163192749, 0.6082469820976257, new Rotation2d(Units.degreesToRadians(54)));
+            0.571, 1.358, new Rotation2d(Units.degreesToRadians(54)));
 
     /** The left coral station pose for the red alliance (mirrored from LEFT_BLUE). */
     public static final Pose2d LEFT_RED = GeomUtil.flip(LEFT_BLUE);
