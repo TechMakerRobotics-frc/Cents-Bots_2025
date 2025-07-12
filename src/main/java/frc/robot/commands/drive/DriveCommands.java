@@ -464,83 +464,81 @@ public class DriveCommands {
   }
 
   public static Command joystickDriveTowardsPoint(
-      SwerveSubsystem drive,
-      DoubleSupplier xSupplier,
-      DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier,
-      double targetX,
-      double targetY) {
+    SwerveSubsystem drive,
+    DoubleSupplier xSupplier,
+    DoubleSupplier ySupplier,
+    DoubleSupplier omegaSupplier,
+    double targetX,
+    double targetY) {
 
-    final double baseTargetWeight = 0.3;
-    final double maxEffectiveDistance = 2.0; // metros
-    final double slowRadius = 0.4; // freio suave se estiver perto
+  final double targetWeight = 0.3; // 30% para o alvo, 70% para os joysticks
 
-    return Commands.run(
-        () -> {
-          double joystickX = xSupplier.getAsDouble();
-          double joystickY = ySupplier.getAsDouble();
+  return Commands.run(
+      () -> {
+        double joystickX = -xSupplier.getAsDouble();
+        double joystickY = -ySupplier.getAsDouble();
 
-          // Deadband e processamento de rotação manual
-          double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
-          omega = Math.copySign(omega * omega, omega);
+        // Apply rotation deadband
+        double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
 
-          joystickX = MathUtil.applyDeadband(joystickX, DEADBAND);
-          joystickY = MathUtil.applyDeadband(joystickY, DEADBAND);
+        // Square rotation value for more precise control
+        omega = Math.copySign(omega * omega, omega);
 
-          Pose2d currentPose = drive.getPose();
-          double dx = targetX - currentPose.getX();
-          double dy = targetY - currentPose.getY();
+        // Aplicar deadband
+        joystickX = MathUtil.applyDeadband(joystickX, DEADBAND);
+        joystickY = MathUtil.applyDeadband(joystickY, DEADBAND);
 
-          double distanceToTarget = Math.hypot(dx, dy);
+        // Posição atual do robô
+        Pose2d currentPose = drive.getPose();
+        double currentX = currentPose.getX();
+        double currentY = currentPose.getY();
 
-          // Vetor normalizado
-          double tx = 0, ty = 0;
-          if (distanceToTarget > 0.01) {
-            tx = dx / distanceToTarget;
-            ty = dy / distanceToTarget;
-          }
+        // Calcular vetor para o ponto alvo
+        double targetVectorX = targetX - currentX;
+        double targetVectorY = targetY - currentY;
 
-          // Peso dinâmico
-          double dynamicWeight =
-              baseTargetWeight * Math.min(distanceToTarget / maxEffectiveDistance, 1.0);
+        // Normalizar o vetor do alvo
+        double targetMagnitude = Math.hypot(targetVectorX, targetVectorY);
+        if (targetMagnitude > 0.01) {
+          targetVectorX /= targetMagnitude;
+          targetVectorY /= targetMagnitude;
+        }
 
-          double blendedX = (1 - dynamicWeight) * joystickX + dynamicWeight * tx;
-          double blendedY = (1 - dynamicWeight) * joystickY + dynamicWeight * ty;
+        // Combinar vetores (joystick e direção ao alvo)
+        double blendedX = (1 - targetWeight) * joystickX + targetWeight * -targetVectorX;
+        double blendedY = (1 - targetWeight) * joystickY + targetWeight * -targetVectorY;
 
-          double blendedMagnitude = Math.hypot(blendedX, blendedY);
-          if (blendedMagnitude > 1.0) {
-            blendedX /= blendedMagnitude;
-            blendedY /= blendedMagnitude;
-          }
+        // Normalizar o vetor combinado (opcional, se necessário)
+        double blendedMagnitude = Math.hypot(blendedX, blendedY);
+        if (blendedMagnitude > 1.0) {
+          blendedX /= blendedMagnitude;
+          blendedY /= blendedMagnitude;
+        }
 
-          // Freio vetorial se muito perto
-          if (distanceToTarget < slowRadius) {
-            double scale = distanceToTarget / slowRadius;
-            blendedX *= scale;
-            blendedY *= scale;
-          }
+        // Ajuste para aliança (inversão para aliança vermelha)
+        boolean isFlipped =
+            DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red;
 
-          boolean isFlipped =
-              DriverStation.getAlliance().isPresent()
-                  && DriverStation.getAlliance().get() == Alliance.Red;
+        // Se os joysticks estão parados, não realiza movimento
+        if (joystickX == 0.0 && joystickY == 0.0) {
+          blendedX = 0;
+          blendedY = 0;
+        }
+        // Transformar velocidades para referência de campo
+        ChassisSpeeds speeds =
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                blendedX * Constants.MAX_SPEED,
+                blendedY * Constants.MAX_SPEED,
+                omega * Constants.MAX_ANGULAR_SPEED, // Sem rotação
+                isFlipped
+                    ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                    : drive.getRotation());
+        drive.drive(speeds);
+      },
+      drive);
+}
 
-          if (joystickX == 0.0 && joystickY == 0.0) {
-            blendedX = 0;
-            blendedY = 0;
-          }
-
-          ChassisSpeeds speeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  blendedX * Constants.MAX_SPEED,
-                  blendedY * Constants.MAX_SPEED,
-                  omega * Constants.MAX_ANGULAR_SPEED,
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation());
-          drive.drive(speeds);
-        },
-        drive);
-  }
 
   public static Command joystickDriveTowardsAimAtPoint(
       SwerveSubsystem drive,
