@@ -548,7 +548,7 @@ public class DriveCommands {
       double targetX,
       double targetY) {
 
-    final double targetWeight = 0.2;
+    final double targetWeight = 0.3;
 
     final ProfiledPIDController angleController =
         new ProfiledPIDController(
@@ -579,8 +579,8 @@ public class DriveCommands {
             targetVectorY /= targetMagnitude;
           }
 
-          double blendedX = (1 - targetWeight) * joystickX + targetWeight * targetVectorX;
-          double blendedY = (1 - targetWeight) * joystickY + targetWeight * targetVectorY;
+          double blendedX = (1 - targetWeight) * joystickX + targetWeight * -targetVectorX;
+          double blendedY = (1 - targetWeight) * joystickY + targetWeight * -targetVectorY;
 
           double blendedMagnitude = Math.hypot(blendedX, blendedY);
           if (blendedMagnitude > 1.0) {
@@ -590,7 +590,7 @@ public class DriveCommands {
 
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
-                  && DriverStation.getAlliance().get() == Alliance.Blue;
+                  && DriverStation.getAlliance().get() == Alliance.Red;
 
           if (joystickX == 0.0 && joystickY == 0.0) {
             blendedX = 0;
@@ -612,8 +612,8 @@ public class DriveCommands {
 
           ChassisSpeeds speeds =
               ChassisSpeeds.fromFieldRelativeSpeeds(
-                  -blendedX * Constants.MAX_SPEED,
-                  -blendedY * Constants.MAX_SPEED,
+                  blendedX * Constants.MAX_SPEED,
+                  blendedY * Constants.MAX_SPEED,
                   omega,
                   isFlipped
                       ? drive.getRotation().plus(new Rotation2d(Math.PI))
